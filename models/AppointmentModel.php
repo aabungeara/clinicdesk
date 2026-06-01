@@ -1,0 +1,364 @@
+<?php
+
+require_once __DIR__ . "/BaseModel.php";
+
+class AppointmentModel extends BaseModel
+{
+    public function book(array $data): bool
+    {
+        try {
+
+            $this->execute(
+                "
+                INSERT INTO appointments
+                (
+                    patient_id,
+                    doctor_id,
+                    appt_date,
+                    appt_time,
+                    reason
+                )
+                VALUES (?,?,?,?,?)
+                ",
+                "iisss",
+                [
+                    $data["patient_id"],
+                    $data["doctor_id"],
+                    $data["appt_date"],
+                    $data["appt_time"],
+                    $data["reason"] ?? null
+                ]
+            );
+
+            return true;
+
+        } catch (Throwable $e) {
+
+            return false;
+        }
+    }
+
+    public function hasConflict(
+        int $doctorId,
+        string $date,
+        string $time
+    ): bool {
+
+        $result = $this->execute(
+            "
+            SELECT id
+            FROM appointments
+            WHERE doctor_id=?
+            AND appt_date=?
+            AND appt_time=?
+            ",
+            "iss",
+            [
+                $doctorId,
+                $date,
+                $time
+            ]
+        );
+
+        return $result->num_rows > 0;
+    }
+
+    private function buildFilters(
+        array $filters,
+        array &$params,
+        string &$types
+    ): string {
+
+        $where = [];
+
+        if (!empty($filters["doctor_id"])) {
+            $where[] =
+                "doctor_id=?";
+            $types .= "i";
+            $params[] =
+                $filters["doctor_id"];
+        }
+
+        if (!empty($filters["status"])) {
+            $where[] =
+                "status=?";
+            $types .= "s";
+            $params[] =
+                $filters["status"];
+        }
+
+        if (!empty($filters["date_from"])) {
+            $where[] =
+                "appt_date>=?";
+            $types .= "s";
+            $params[] =
+                $filters["date_from"];
+        }
+
+        if (!empty($filters["date_to"])) {
+            $where[] =
+                "appt_date<=?";
+            $types .= "s";
+            $params[] =
+                $filters["date_to"];
+        }
+
+        return count($where)
+            ? " WHERE "
+              . implode(
+                  " AND ",
+                  $where
+                )
+            : "";
+    }
+
+    public function getByPatient(
+        int $patientId,
+        int $page,
+        array $filters
+    ): array {
+
+        $params = [$patientId];
+        $types = "i";
+
+        $where =
+            $this->buildFilters(
+                $filters,
+                $params,
+                $types
+            );
+
+        $offset =
+            ($page - 1)
+            * ITEMS_PER_PAGE;
+
+        $types .= "ii";
+
+        $params[] =
+            ITEMS_PER_PAGE;
+
+        $params[] =
+            $offset;
+
+        $result =
+            $this->execute(
+                "
+                SELECT *
+                FROM appointments
+                WHERE patient_id=?
+                $where
+                ORDER BY appt_date DESC
+                LIMIT ?
+                OFFSET ?
+                ",
+                $types,
+                $params
+            );
+
+        return $result->fetch_all(
+            MYSQLI_ASSOC
+        );
+    }
+
+    public function getByDoctor(
+        int $doctorId,
+        int $page,
+        array $filters
+    ): array {
+
+        $filters["doctor_id"] =
+            $doctorId;
+
+        return $this->getAll(
+            $page,
+            $filters
+        );
+    }
+
+    public function getAll(
+        int $page,
+        array $filters
+    ): array {
+
+        $params = [];
+        $types = "";
+
+        $where =
+            $this->buildFilters(
+                $filters,
+                $params,
+                $types
+            );
+
+        $offset =
+            ($page - 1)
+            * ITEMS_PER_PAGE;
+
+        $types .= "ii";
+
+        $params[] =
+            ITEMS_PER_PAGE;
+
+        $params[] =
+            $offset;
+
+        $result =
+            $this->execute(
+                "
+                SELECT
+                    a.*,
+
+                    p.name AS patient_name,
+
+                    du.name AS doctor_name
+
+                FROM appointments a
+
+                JOIN users p
+                    ON a.patient_id=p.id
+
+                JOIN doctors d
+                    ON a.doctor_id=d.id
+
+                JOIN users du
+                    ON d.user_id=du.id
+
+                $where
+
+                ORDER BY
+                a.appt_date DESC
+
+                LIMIT ?
+                OFFSET ?
+                ",
+                $types,
+                $params
+            );
+
+        return $result->fetch_all(
+            MYSQLI_ASSOC
+        );
+    }
+
+    public function countFiltered(
+        string $scope,
+        int $scopeId,
+        array $filters
+    ): int {
+
+        $where =
+            "";
+
+        $params = [];
+        $types = "";
+
+        if (
+            $scope === "patient"
+        ) {
+
+            $where =
+                " WHERE patient_id=? ";
+
+            $params[] =
+                $scopeId;
+
+            $types .= "i";
+
+        }
+
+        if (
+            $scope === "doctor"
+        ) {
+
+            $where =
+                " WHERE doctor_id=? ";
+
+            $params[] =
+                $scopeId;
+
+            $types .= "i";
+
+        }
+
+        $result =
+            $this->execute(
+                "
+                SELECT COUNT(*) total
+                FROM appointments
+                $where
+                ",
+                $types,
+                $params
+            );
+
+        return (int)
+        $result
+        ->fetch_assoc()
+        ["total"];
+    }
+
+    public function updateStatus(
+        int $id,
+        string $status,
+        string $notes=""
+    ): bool {
+
+        $result =
+            $this->execute(
+                "
+                UPDATE appointments
+                SET
+                status=?,
+                doctor_notes=?
+                WHERE id=?
+                ",
+                "ssi",
+                [
+                    $status,
+                    $notes,
+                    $id
+                ]
+            );
+
+        return $result === true;
+    }
+
+    public function findById(
+        int $id
+    ): ?array {
+
+        $result =
+            $this->execute(
+                "
+                SELECT
+
+                a.*,
+
+                p.name patient_name,
+
+                du.name doctor_name
+
+                FROM appointments a
+
+                JOIN users p
+                ON a.patient_id=p.id
+
+                JOIN doctors d
+                ON a.doctor_id=d.id
+
+                JOIN users du
+                ON d.user_id=du.id
+
+                WHERE a.id=?
+
+                ",
+                "i",
+                [$id]
+            );
+
+        return
+        $result
+        ->fetch_assoc()
+        ?: null;
+    }
+}
