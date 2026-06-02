@@ -9,7 +9,7 @@ class AuthController
 {
     public function login()
     {
-        session_start();
+       
 
         if (Auth::check()) {
             redirect("index.php?page=dashboard");

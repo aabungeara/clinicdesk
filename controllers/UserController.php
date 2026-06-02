@@ -46,11 +46,11 @@ class UserController
     public function create(): void
     {
         Auth::requireRole("admin");
-
+    
         $specializations =
             $this->specializationModel
                 ->getAll();
-
+        
         require_once __DIR__
             . "/../views/users/create.php";
     }

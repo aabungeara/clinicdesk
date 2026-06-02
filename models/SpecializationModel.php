@@ -50,7 +50,7 @@ class SpecializationModel extends BaseModel
             "s",
             [$name]
         );
-
+        
         return $this->db->lastInsertId();
     }
 
