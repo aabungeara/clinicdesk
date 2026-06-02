@@ -1,5 +1,7 @@
 <?php
-
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 require_once __DIR__ . "/helpers.php";
 
 class Auth
@@ -41,13 +43,26 @@ class Auth
     }
 
     public static function requireRole(string ...$roles): void
-    {
-        if (!self::check()) {
-            redirect("index.php?page=auth&action=login");
-        }
+{
+    if (!self::check()) {
 
-        if (!in_array(self::role(), $roles, true)) {
-            redirect("views/errors/403.php");
-        }
+        redirect(
+            "index.php?page=auth&action=login"
+        );
     }
+
+    if (
+        !in_array(
+            self::role(),
+            $roles,
+            true
+        )
+    ) {
+
+        require_once __DIR__
+            . "/../views/errors/403.php";
+
+        exit;
+    }
+}
 }

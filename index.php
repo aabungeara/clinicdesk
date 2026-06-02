@@ -30,14 +30,7 @@ if ($page === "auth") {
 
 if ($page === "dashboard") {
 
-    require_once __DIR__
-        . "/controllers/DashboardController.php";
-
     require_once __DIR__ . "/controllers/DashboardController.php";
-
-    require_once __DIR__ . "/controllers/DashboardController.php";
-
-    
 
     $controller =
         new DashboardController();
@@ -47,4 +40,32 @@ if ($page === "dashboard") {
     exit;
 }
 
+if ($page === "users") {
+
+    require_once __DIR__
+        . "/controllers/UserController.php";
+
+    $controller =
+        new UserController();
+
+    $action =
+        $_GET["action"] ?? "index";
+
+    if (
+        method_exists(
+            $controller,
+            $action
+        )
+    ) {
+
+        $controller->$action();
+
+    } else {
+
+        require_once __DIR__
+            . "/views/errors/404.php";
+    }
+
+    exit;
+}
 echo "Page Not Found";
