@@ -17,6 +17,7 @@ class Auth
 
     public static function logout(): void
     {
+        $_SESSION = [];
         session_unset();
 
         session_destroy();
