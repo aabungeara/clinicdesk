@@ -6,88 +6,90 @@ require_once __DIR__ . "/../partials/header.php";
 require_once __DIR__ . "/../partials/navbar.php";
 require_once __DIR__ . "/../partials/sidebar.php";
 
+$user = $user ?? [];
+
 ?>
 
 <div class="content-wrapper">
 
-<section class="content p-3">
+    <section class="content p-3">
 
-<div class="card">
+        <div class="card">
 
-<div class="card-header">
+            <div class="card-header">
 
-<h3>Edit User</h3>
+                <h3>Edit User</h3>
 
-</div>
+            </div>
 
-<form
-method="POST"
-action="index.php?page=users&action=update">
+            <form
+                method="POST"
+                action="index.php?page=users&action=update">
 
-<div class="card-body">
+                <div class="card-body">
 
-<input
-type="hidden"
-name="csrf_token"
-value="<?= CSRF::generateToken() ?>">
+                    <input
+                        type="hidden"
+                        name="csrf_token"
+                        value="<?= CSRF::generateToken() ?>">
 
-<input
-type="hidden"
-name="id"
-value="<?= $user["id"] ?>">
+                    <input
+                        type="hidden"
+                        name="id"
+                        value="<?= $user["id"] ?>">
 
-<div class="form-group">
+                    <div class="form-group">
 
-<label>Name</label>
+                        <label>Name</label>
 
-<input
-type="text"
-name="name"
-class="form-control"
-value="<?= htmlspecialchars($user["name"]) ?>"
-required>
+                        <input
+                            type="text"
+                            name="name"
+                            class="form-control"
+                            value="<?= htmlspecialchars($user["name"]) ?>"
+                            required>
 
-</div>
+                    </div>
 
-<div class="form-group">
+                    <div class="form-group">
 
-<label>Phone</label>
+                        <label>Phone</label>
 
-<input
-type="text"
-name="phone"
-class="form-control"
-value="<?= htmlspecialchars($user["phone"] ?? "") ?>">
+                        <input
+                            type="text"
+                            name="phone"
+                            class="form-control"
+                            value="<?= htmlspecialchars($user["phone"] ?? "") ?>">
 
-</div>
+                    </div>
 
-</div>
+                </div>
 
-<div class="card-footer">
+                <div class="card-footer">
 
-<button
-type="submit"
-class="btn btn-success">
+                    <button
+                        type="submit"
+                        class="btn btn-success">
 
-Save
+                        Save
 
-</button>
+                    </button>
 
-<a
-href="index.php?page=users"
-class="btn btn-secondary">
+                    <a
+                        href="<?= h(url('users')) ?>"
+                        class="btn btn-secondary">
 
-Cancel
+                        Cancel
 
-</a>
+                    </a>
 
-</div>
+                </div>
 
-</form>
+            </form>
 
-</div>
+        </div>
 
-</section>
+    </section>
 
 </div>
 

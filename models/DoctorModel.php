@@ -32,9 +32,14 @@ class DoctorModel extends BaseModel
     {
         $result = $this->execute(
             "
-        SELECT *
-        FROM doctors
-        WHERE id=?
+                SELECT 
+                d.*, 
+                u.name, 
+                u.email
+            FROM doctors d
+            JOIN users u 
+                ON d.user_id = u.id
+            WHERE d.id = ?
         ",
             "i",
             [$id]

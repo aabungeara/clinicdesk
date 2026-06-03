@@ -242,21 +242,7 @@ require_once __DIR__ . "/../partials/sidebar.php";
 
                                         <br>
 
-                                        <?php
-
-                                        $days = [
-                                            "Sun",
-                                            "Mon",
-                                            "Tue",
-                                            "Wed",
-                                            "Thu",
-                                            "Fri",
-                                            "Sat"
-                                        ];
-
-                                        foreach ($days as $day):
-
-                                        ?>
+                                        <?php foreach (AVAILABLE_DAYS as $day): ?>
 
                                             <div
                                                 class="form-check form-check-inline mr-3">
