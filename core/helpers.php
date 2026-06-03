@@ -24,3 +24,15 @@ function formatTime(string $time): string
 {
     return date("h:i A", strtotime($time));
 }
+
+function h(string $value): string
+{
+    return htmlspecialchars(trim($value), ENT_QUOTES, "UTF-8");
+}
+
+function url(string $path = ''): string
+{
+    $baseUrl = "http://localhost/clinic"; 
+    
+    return $baseUrl . '/' . ltrim($path, '/');
+}

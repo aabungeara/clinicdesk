@@ -2,6 +2,12 @@
 
 Auth::requireRole("admin");
 
+$page       = $page ?? max(1, (int)($_GET["p"] ?? 1));
+$role       = $role ?? trim($_GET["role"] ?? "");
+$search     = $search ?? trim($_GET["search"] ?? "");
+$totalPages = $totalPages ?? 1;
+$users      = $users ?? [];
+
 $pageTitle = "Users";
 
 require_once __DIR__ . "/../partials/header.php";
@@ -178,6 +184,7 @@ require_once __DIR__ . "/../partials/sidebar.php";
                                 <th>ID</th>
                                 <th>Name</th>
                                 <th>Email</th>
+                                <th>Phone</th>
                                 <th>Role</th>
                                 <th>Status</th>
                                 <th>Actions</th>
@@ -193,7 +200,7 @@ require_once __DIR__ . "/../partials/sidebar.php";
                                 <tr>
 
                                     <td
-                                        colspan="6"
+                                        colspan="7"
                                         class="text-center">
 
                                         No users found
@@ -229,6 +236,11 @@ require_once __DIR__ . "/../partials/sidebar.php";
                                             ) ?>
 
                                         </td>
+                                        <td>
+
+                                            <?= htmlspecialchars(
+                                                $user["phone"] ?? "-"
+                                            ) ?>
 
                                         <td>
 
@@ -312,6 +324,33 @@ require_once __DIR__ . "/../partials/sidebar.php";
 
                     </table>
 
+                    <?php if ($totalPages > 1): ?>
+
+                        <nav class="mt-3">
+
+                            <ul class="pagination">
+
+                                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+
+                                    <li class="page-item <?= $i == $page ? 'active' : '' ?>">
+
+                                        <a
+                                            class="page-link"
+                                            href="index.php?page=users&p=<?= $i ?>&role=<?= urlencode($role) ?>&search=<?= urlencode($search) ?>">
+
+                                            <?= $i ?>
+
+                                        </a>
+
+                                    </li>
+
+                                <?php endfor; ?>
+
+                            </ul>
+
+                        </nav>
+
+                    <?php endif; ?>
                 </div>
 
             </div>

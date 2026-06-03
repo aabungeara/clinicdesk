@@ -64,6 +64,19 @@ require_once __DIR__ . "/../partials/sidebar.php";
                     </h3>
 
                 </div>
+                <?php if (!empty($_SESSION["flash_error"])): ?>
+
+                    <div class="alert alert-danger">
+
+                        <?= htmlspecialchars(
+                            $_SESSION["flash_error"]
+                        ) ?>
+
+                    </div>
+
+                    <?php unset($_SESSION["flash_error"]); ?>
+
+                <?php endif; ?>
 
                 <form
                     method="POST"
@@ -75,74 +88,92 @@ require_once __DIR__ . "/../partials/sidebar.php";
                             type="hidden"
                             name="csrf_token"
                             value="<?= CSRF::generateToken() ?>">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
 
-                        <div class="form-group">
+                                    <label>Name</label>
 
-                            <label>Name</label>
+                                    <input
+                                        type="text"
+                                        name="name"
+                                        class="form-control"
+                                        required>
 
-                            <input
-                                type="text"
-                                name="name"
-                                class="form-control"
-                                required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
 
+
+                                <div class="form-group">
+
+                                    <label>Email</label>
+
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        class="form-control"
+                                        required>
+
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="form-group">
 
-                            <label>Email</label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
 
-                            <input
-                                type="email"
-                                name="email"
-                                class="form-control"
-                                required>
+                                    <label>Phone</label>
 
+                                    <input
+                                        type="text"
+                                        name="phone"
+                                        class="form-control">
+
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+
+                                    <label>Temporary Password</label>
+
+                                    <input
+                                        type="password"
+                                        name="password"
+                                        class="form-control"
+                                        required>
+
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
 
-                            <label>Phone</label>
+                                    <label>Role</label>
 
-                            <input
-                                type="text"
-                                name="phone"
-                                class="form-control">
+                                    <select
+                                        name="role"
+                                        id="role"
+                                        class="form-control">
 
+                                        <option value="patient">
+                                            Patient
+                                        </option>
+
+                                        <option value="doctor">
+                                            Doctor
+                                        </option>
+
+                                    </select>
+
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="form-group">
-
-                            <label>Temporary Password</label>
-
-                            <input
-                                type="password"
-                                name="password"
-                                class="form-control"
-                                required>
-
-                        </div>
-
-                        <div class="form-group">
-
-                            <label>Role</label>
-
-                            <select
-                                name="role"
-                                id="role"
-                                class="form-control">
-
-                                <option value="patient">
-                                    Patient
-                                </option>
-
-                                <option value="doctor">
-                                    Doctor
-                                </option>
-
-                            </select>
-
-                        </div>
 
                         <div
                             id="doctorFields"
@@ -150,113 +181,127 @@ require_once __DIR__ . "/../partials/sidebar.php";
 
                             <hr>
 
-                            <h5>
+                            <h5 class="mb-3 text-primary">
                                 Doctor Information
                             </h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
 
-                            <div class="form-group">
+                                        <label>
+                                            Specialization
+                                        </label>
 
-                                <label>
-                                    Specialization
-                                </label>
+                                        <?php
+                                        /** @var array $specializations */
+                                        ?>
+                                        <select
+                                            name="specialization_id"
+                                            class="form-control">
 
-                                <select
-                                    name="specialization_id"
-                                    class="form-control">
+                                            <?php foreach ($specializations as $spec): ?>
 
-                                    <?php foreach ($specializations as $spec): ?>
+                                                <option
+                                                    value="<?= $spec["id"] ?>">
 
-                                        <option
-                                            value="<?= $spec["id"] ?>">
+                                                    <?= htmlspecialchars(
+                                                        $spec["name"]
+                                                    ) ?>
 
-                                            <?= htmlspecialchars(
-                                                $spec["name"]
-                                            ) ?>
+                                                </option>
 
-                                        </option>
+                                            <?php endforeach; ?>
 
-                                    <?php endforeach; ?>
+                                        </select>
 
-                                </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
 
-                            </div>
-
-                            <div class="form-group">
-
-                                <label>
-                                    Consultation Fee
-                                </label>
-
-                                <input
-                                    type="number"
-                                    step="0.01"
-                                    name="consultation_fee"
-                                    class="form-control">
-
-                            </div>
-
-                            <div class="form-group">
-
-                                <label>
-                                    Available Days
-                                </label>
-
-                                <br>
-
-                                <?php
-
-                                $days = [
-                                    "Sun",
-                                    "Mon",
-                                    "Tue",
-                                    "Wed",
-                                    "Thu",
-                                    "Fri",
-                                    "Sat"
-                                ];
-
-                                foreach ($days as $day):
-
-                                ?>
-
-                                    <div
-                                        class="form-check form-check-inline">
+                                        <label>
+                                            Consultation Fee
+                                        </label>
 
                                         <input
-                                            class="form-check-input"
-                                            type="checkbox"
-                                            name="available_days[]"
-                                            value="<?= $day ?>">
+                                            type="number"
+                                            step="0.01"
+                                            name="consultation_fee"
+                                            class="form-control">
 
-                                        <label
-                                            class="form-check-label">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
 
-                                            <?= $day ?>
-
+                                        <label>
+                                            Available Days
                                         </label>
+
+                                        <br>
+
+                                        <?php
+
+                                        $days = [
+                                            "Sun",
+                                            "Mon",
+                                            "Tue",
+                                            "Wed",
+                                            "Thu",
+                                            "Fri",
+                                            "Sat"
+                                        ];
+
+                                        foreach ($days as $day):
+
+                                        ?>
+
+                                            <div
+                                                class="form-check form-check-inline mr-3">
+
+                                                <input
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                    name="available_days[]"
+                                                    value="<?= $day ?>">
+
+                                                <label
+                                                    class="form-check-label" for="day_<?= $day ?>">
+
+                                                    <?= $day ?>
+
+                                                </label>
+
+                                            </div>
+
+                                        <?php endforeach; ?>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+
+                                        <label>Bio</label>
+
+                                        <textarea
+                                            name="bio"
+                                            class="form-control"
+                                            rows="4"></textarea>
 
                                     </div>
 
-                                <?php endforeach; ?>
+                                </div>
 
                             </div>
-
-                            <div class="form-group">
-
-                                <label>Bio</label>
-
-                                <textarea
-                                    name="bio"
-                                    class="form-control"
-                                    rows="4"></textarea>
-
-                            </div>
-
                         </div>
-
                     </div>
 
-                    <div class="card-footer">
+                    <div class="card-footer bg-light">
 
                         <button
                             type="submit"
@@ -267,8 +312,8 @@ require_once __DIR__ . "/../partials/sidebar.php";
                         </button>
 
                         <a
-                            href="index.php?page=users"
-                            class="btn btn-secondary">
+                            href="<?= h(url('users')) ?>"
+                            class="btn btn-secondary float-right">
 
                             Cancel
 
@@ -287,24 +332,22 @@ require_once __DIR__ . "/../partials/sidebar.php";
 </div>
 
 <script>
+    document
+        .getElementById("role")
+        .addEventListener(
+            "change",
+            function() {
 
-document
-    .getElementById("role")
-    .addEventListener(
-        "change",
-        function () {
-
-            document
-                .getElementById(
-                    "doctorFields"
-                )
-                .style.display =
-                    this.value === "doctor"
-                        ? "block"
-                        : "none";
-        }
-    );
-
+                document
+                    .getElementById(
+                        "doctorFields"
+                    )
+                    .style.display =
+                    this.value === "doctor" ?
+                    "block" :
+                    "none";
+            }
+        );
 </script>
 
 <?php

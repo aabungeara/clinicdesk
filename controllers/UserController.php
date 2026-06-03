@@ -44,8 +44,29 @@ class UserController
                 $search
             );
 
+        $totalUsers =
+            $this->userModel
+            ->countAll(
+                $role,
+                $search
+            );
 
-        require_once __DIR__
+        $totalPages =
+            (int) ceil(
+                $totalUsers
+                    / ITEMS_PER_PAGE
+            );
+
+        $data = [
+            'users'      => $users,
+            'page'       => $page,
+            'role'       => $role,
+            'search'     => $search,
+            'totalPages' => $totalPages
+        ];
+        extract($data);
+
+        require __DIR__
             . "/../views/users/index.php";
     }
 
@@ -57,7 +78,7 @@ class UserController
             $this->specializationModel
             ->getAll();
 
-        require_once __DIR__
+        require __DIR__
             . "/../views/users/create.php";
     }
 
@@ -100,42 +121,64 @@ class UserController
         $role =
             $_POST["role"] ?? "patient";
 
-        $userId =
-            $this->userModel->create([
-                "name" => $name,
-                "email" => $email,
-                "password" => password_hash(
-                    $password,
-                    PASSWORD_DEFAULT
-                ),
-                "role" => $role,
-                "phone" => $phone
-            ]);
+        try {
+            $existingUser =
+                $this->userModel
+                ->findByEmail($email);
 
-        if ($role === "doctor") {
+            if ($existingUser) {
 
-            $this->doctorModel->create([
-                "user_id" => $userId,
-                "specialization_id" =>
-                (int)$_POST["specialization_id"],
-                "consultation_fee" =>
-                $_POST["consultation_fee"],
-                "available_days" =>
-                implode(
-                    ",",
-                    $_POST["available_days"] ?? []
-                ),
-                "bio" =>
-                trim($_POST["bio"] ?? "")
-            ]);
+                $_SESSION["flash"] =
+                    "Email already exists";
+
+                redirect(
+                    "index.php?page=users"
+                );
+            }
+
+            $userId =
+                $this->userModel->create([
+                    "name" => $name,
+                    "email" => $email,
+                    "password" => password_hash(
+                        $password,
+                        PASSWORD_DEFAULT
+                    ),
+                    "role" => $role,
+                    "phone" => $phone
+                ]);
+
+            if ($role === "doctor") {
+
+                $this->doctorModel->create([
+                    "user_id" => $userId,
+                    "specialization_id" =>
+                    (int)$_POST["specialization_id"],
+                    "consultation_fee" =>
+                    $_POST["consultation_fee"],
+                    "available_days" =>
+                    implode(
+                        ",",
+                        $_POST["available_days"] ?? []
+                    ),
+                    "bio" =>
+                    trim($_POST["bio"] ?? "")
+                ]);
+            }
+
+            $_SESSION["flash"] =
+                "User created successfully";
+
+            redirect(
+                "index.php?page=users"
+            );
+        } catch (Throwable $e) {
+            $_SESSION["flash"] = "Cannot create user";
+
+            redirect(
+                "index.php?page=users"
+            );
         }
-
-        $_SESSION["flash"] =
-            "User created successfully";
-
-        redirect(
-            "index.php?page=users"
-        );
     }
 
     public function edit(): void
@@ -160,7 +203,7 @@ class UserController
         }
 
 
-        require_once __DIR__
+        require __DIR__
             . "/../views/users/edit.php";
     }
     public function update(): void

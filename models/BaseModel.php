@@ -25,10 +25,7 @@ abstract class BaseModel
             );
 
         } catch (Throwable $e) {
-
-            throw new RuntimeException(
-                "Database operation failed"
-            );
+              die($e->getMessage());
         }
     }
 }

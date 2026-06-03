@@ -8,7 +8,7 @@ define(
 );
 
 // عدد العناصر بالصفحة
-define("ITEMS_PER_PAGE", 10);
+define("ITEMS_PER_PAGE", 5);
 
 // Upload limits
 define("MAX_AVATAR_SIZE", 1024 * 1024); // 1MB
