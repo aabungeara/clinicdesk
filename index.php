@@ -13,6 +13,7 @@ $action = $_GET["action"] ?? "login";
 
 if ($page === "auth") {
 
+
     require_once __DIR__ . "/controllers/AuthController.php";
 
     $controller = new AuthController();
@@ -20,7 +21,7 @@ if ($page === "auth") {
     if (method_exists($controller, $action)) {
         $controller->$action();
     } else {
-        echo "Action Not Found";
+        require_once __DIR__ . "/views/errors/404.php";
     }
 
     exit;
@@ -42,8 +43,7 @@ if ($page === "dashboard") {
 
 if ($page === "users") {
 
-    require_once __DIR__
-        . "/controllers/UserController.php";
+    require_once __DIR__. "/controllers/UserController.php";
 
     $controller =
         new UserController();
@@ -68,4 +68,4 @@ if ($page === "users") {
 
     exit;
 }
-echo "Page Not Found";
+require_once __DIR__ . "/views/errors/404.php";

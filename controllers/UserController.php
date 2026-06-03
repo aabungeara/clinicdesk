@@ -131,4 +131,72 @@ class UserController
             "index.php?page=users"
         );
     }
+
+    public function edit(): void
+{
+    Auth::requireRole("admin");
+
+    $id = (int)($_GET["id"] ?? 0);
+
+    $user =
+        $this->userModel
+            ->findById($id);
+
+    if (!$user) {
+
+        $_SESSION["flash"] =
+            "User not found";
+
+
+        redirect(
+            "index.php?page=users"
+        );
+    }
+    
+
+    require_once __DIR__
+        . "/../views/users/edit.php";
+} 
+    public function update(): void
+{
+    Auth::requireRole("admin");
+
+    if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+        redirect("index.php?page=users");
+    }
+
+    if (
+        !CSRF::validateToken(
+            $_POST["csrf_token"] ?? ""
+        )
+    ) {
+        die("Invalid CSRF Token");
+    }
+
+    $id = (int)$_POST["id"];
+
+    $success =
+        $this->userModel->update(
+            $id,
+            [
+                "name" =>
+                    trim($_POST["name"]),
+
+                "phone" =>
+                    trim($_POST["phone"]),
+
+                "avatar" =>
+                    null
+            ]
+        );
+
+    $_SESSION["flash"] =
+        $success
+        ? "User updated successfully"
+        : "Update failed";
+
+    redirect(
+        "index.php?page=users"
+    );
+}
 }

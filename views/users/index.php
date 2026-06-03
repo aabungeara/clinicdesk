@@ -90,101 +90,113 @@ require_once __DIR__ . "/../partials/sidebar.php";
 
                         <thead>
 
-                        <tr>
+                            <tr>
 
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Role</th>
-                            <th>Status</th>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Actions</th>
 
-                        </tr>
+                            </tr>
 
                         </thead>
 
                         <tbody>
 
-                        <?php if (empty($users)): ?>
-
-                            <tr>
-
-                                <td
-                                    colspan="5"
-                                    class="text-center">
-
-                                    No users found
-
-                                </td>
-
-                            </tr>
-
-                        <?php else: ?>
-
-                            <?php foreach ($users as $user): ?>
+                            <?php if (empty($users)): ?>
 
                                 <tr>
 
-                                    <td>
+                                    <td
+                                        colspan="5"
+                                        class="text-center">
 
-                                        <?= $user["id"] ?>
-
-                                    </td>
-
-                                    <td>
-
-                                        <?= htmlspecialchars(
-                                            $user["name"]
-                                        ) ?>
-
-                                    </td>
-
-                                    <td>
-
-                                        <?= htmlspecialchars(
-                                            $user["email"]
-                                        ) ?>
-
-                                    </td>
-
-                                    <td>
-
-                                        <?= htmlspecialchars(
-                                            ucfirst(
-                                                $user["role"]
-                                            )
-                                        ) ?>
-
-                                    </td>
-
-                                    <td>
-
-                                        <?php if (
-                                            (int)$user["is_active"] === 1
-                                        ): ?>
-
-                                            <span class="badge badge-success">
-
-                                                Active
-
-                                            </span>
-
-                                        <?php else: ?>
-
-                                            <span class="badge badge-danger">
-
-                                                Inactive
-
-                                            </span>
-
-                                        <?php endif; ?>
+                                        No users found
 
                                     </td>
 
                                 </tr>
 
-                            <?php endforeach; ?>
+                            <?php else: ?>
 
-                        <?php endif; ?>
+                                <?php foreach ($users as $user): ?>
+
+                                    <tr>
+
+                                        <td>
+
+                                            <?= $user["id"] ?>
+
+                                        </td>
+
+                                        <td>
+
+                                            <?= htmlspecialchars(
+                                                $user["name"]
+                                            ) ?>
+
+                                        </td>
+
+                                        <td>
+
+                                            <?= htmlspecialchars(
+                                                $user["email"]
+                                            ) ?>
+
+                                        </td>
+
+                                        <td>
+
+                                            <?= htmlspecialchars(
+                                                ucfirst(
+                                                    $user["role"]
+                                                )
+                                            ) ?>
+
+                                        </td>
+
+                                        <td>
+
+                                            <?php if (
+                                                (int)$user["is_active"] === 1
+                                            ): ?>
+
+                                                <span class="badge badge-success">
+
+                                                    Active
+
+                                                </span>
+
+                                            <?php else: ?>
+
+                                                <span class="badge badge-danger">
+
+                                                    Inactive
+
+                                                </span>
+
+                                            <?php endif; ?>
+
+                                        </td>
+                                        <td>
+
+                                            <a
+                                                href="index.php?page=users&action=edit&id=<?= $user["id"] ?>"
+                                                class="btn btn-warning btn-sm">
+
+                                                Edit
+
+                                            </a>
+
+                                        </td>
+
+                                    </tr>
+
+                                <?php endforeach; ?>
+
+                            <?php endif; ?>
 
                         </tbody>
 
