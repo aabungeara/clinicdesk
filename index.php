@@ -100,4 +100,33 @@ if ($page === "doctors") {
 
     exit;
 }
+
+if ($page === "specializations") {
+
+    require_once __DIR__
+        . "/controllers/SpecializationController.php";
+
+    $controller =
+        new SpecializationController();
+
+    $action =
+        $_GET["action"] ?? "index";
+
+    if (
+        method_exists(
+            $controller,
+            $action
+        )
+    ) {
+
+        $controller->$action();
+
+    } else {
+
+        require_once __DIR__
+            . "/views/errors/404.php";
+    }
+
+    exit;
+}
 require_once __DIR__ . "/views/errors/404.php";

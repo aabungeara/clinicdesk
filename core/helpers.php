@@ -32,7 +32,7 @@ function h(string $value): string
 
 function url(string $path = ''): string
 {
-    $baseUrl = "http://localhost/clinic"; 
+    $baseUrl = "http://localhost/clinicdesk"; 
     
     return $baseUrl . '/' . ltrim($path, '/');
 }

@@ -298,7 +298,7 @@ require_once __DIR__ . "/../partials/sidebar.php";
                         </button>
 
                         <a
-                            href="<?= h(url('users')) ?>"
+                            href="/clinicdesk/index.php?page=users"
                             class="btn btn-secondary float-right">
 
                             Cancel

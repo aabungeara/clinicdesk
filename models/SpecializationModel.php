@@ -50,7 +50,7 @@ class SpecializationModel extends BaseModel
             "s",
             [$name]
         );
-        
+
         return $this->db->lastInsertId();
     }
 
@@ -89,5 +89,42 @@ class SpecializationModel extends BaseModel
         );
 
         return $result === true;
+    }
+    public function isSafeToDelete(
+        int $id
+    ): bool {
+
+        $result = $this->execute(
+            "
+        SELECT COUNT(*) AS total
+        FROM doctors
+        WHERE specialization_id=?
+        ",
+            "i",
+            [$id]
+        );
+
+        $row = $result->fetch_assoc();
+
+        return (int)$row["total"] === 0;
+    }
+
+    public function countDoctors(
+        int $id
+    ): int {
+
+        $result = $this->execute(
+            "
+        SELECT COUNT(*) AS total
+        FROM doctors
+        WHERE specialization_id=?
+        ",
+            "i",
+            [$id]
+        );
+
+        $row = $result->fetch_assoc();
+
+        return (int)$row["total"];
     }
 }

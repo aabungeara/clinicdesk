@@ -46,20 +46,36 @@
                     </li>
 
                 <?php endif; ?>
+                <?php if (
+                    Auth::check() &&
+                    Auth::role() === "admin"
+                ): ?>
+                    <li class="nav-item">
 
-                <li class="nav-item">
+                        <a
+                            href="index.php?page=doctors"
+                            class="nav-link">
 
-                    <a
-                        href="index.php?page=doctors"
-                        class="nav-link">
+                            <i class="nav-icon fas fa-user-md"></i>
 
-                        <i class="nav-icon fas fa-user-md"></i>
+                            <p>Doctors</p>
 
-                        <p>Doctors</p>
+                        </a>
 
-                    </a>
+                    </li>
+                    <li class="nav-item">
 
-                </li>
+                        <a
+                            href="index.php?page=specializations"
+                            class="nav-link">
+
+                            <i class="nav-icon fas fa-stethoscope"></i>
+
+                            <p>Specializations</p>
+
+                        </a>
+                    </li>
+                <?php endif; ?>
 
             </ul>
 

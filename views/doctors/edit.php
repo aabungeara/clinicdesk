@@ -30,7 +30,7 @@ $selectedDays = explode(",", $doctor["available_days"] ?? "");
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Name</label>
-                                <input type="text" name="name" class="form-control" value="<?= htmlspecialchars($doctor["name"] ?? $doctor["username"] ?? '') ?>" required>
+                                <input type="text" name="name" class="form-control" value="<?= htmlspecialchars($doctor["doctor_name"] ?? $doctor["name"] ?? '') ?>" required>
                             </div>
                         </div>
 
@@ -72,7 +72,7 @@ $selectedDays = explode(",", $doctor["available_days"] ?? "");
 
                     <div class="form-group mt-3">
                         <label>Bio</label>
-                        <textarea name="bio" rows="4" class="form-control" style="resize: vertical;"><?= htmlspecialchars($doctor["bio"] ?? "") ?></textarea>
+                        <textarea name="bio" rows="3" class="form-control" style="resize: vertical;"><?= htmlspecialchars($doctor["bio"] ?? "") ?></textarea>
                     </div>
 
                     <div class="form-group mt-4">
