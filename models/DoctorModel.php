@@ -28,6 +28,22 @@ class DoctorModel extends BaseModel
         return $result->fetch_assoc() ?: null;
     }
 
+    public function findById(int $id): ?array
+    {
+        $result = $this->execute(
+            "
+        SELECT *
+        FROM doctors
+        WHERE id=?
+        ",
+            "i",
+            [$id]
+        );
+
+        return $result->fetch_assoc()
+            ?: null;
+    }
+
     public function getAll(): array
     {
         $result = $this->execute(
@@ -124,15 +140,17 @@ class DoctorModel extends BaseModel
                 specialization_id=?,
                 bio=?,
                 consultation_fee=?,
-                available_days=?
+                available_days=?,
+                photo=?
             WHERE id=?
             ",
-            "isdsi",
+            "isdssi",
             [
                 $data["specialization_id"],
                 $data["bio"],
                 $data["consultation_fee"],
                 $data["available_days"],
+                $data["photo"],
                 $doctorId
             ]
         );
@@ -167,6 +185,28 @@ class DoctorModel extends BaseModel
                 ",",
                 $row["available_days"]
             )
+        );
+    }
+    public function getAllDoctors(): array
+    {
+        $result = $this->execute(
+            "
+        SELECT
+            d.*,
+            u.name AS doctor_name,
+            u.phone,
+            s.name AS specialization_name
+        FROM doctors d
+        INNER JOIN users u
+            ON d.user_id = u.id
+        INNER JOIN specializations s
+            ON d.specialization_id = s.id
+        ORDER BY u.name
+        "
+        );
+
+        return $result->fetch_all(
+            MYSQLI_ASSOC
         );
     }
 }

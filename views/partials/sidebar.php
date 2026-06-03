@@ -47,6 +47,20 @@
 
                 <?php endif; ?>
 
+                <li class="nav-item">
+
+                    <a
+                        href="index.php?page=doctors"
+                        class="nav-link">
+
+                        <i class="nav-icon fas fa-user-md"></i>
+
+                        <p>Doctors</p>
+
+                    </a>
+
+                </li>
+
             </ul>
 
         </nav>

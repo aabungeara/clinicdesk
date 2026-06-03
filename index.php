@@ -70,4 +70,33 @@ if ($page === "users") {
 
     exit;
 }
+
+if ($page === "doctors") {
+
+    require_once __DIR__
+        . "/controllers/DoctorController.php";
+
+    $controller =
+        new DoctorController();
+
+    $action =
+        $_GET["action"] ?? "index";
+
+    if (
+        method_exists(
+            $controller,
+            $action
+        )
+    ) {
+
+        $controller->$action();
+
+    } else {
+
+        require_once __DIR__
+            . "/views/errors/404.php";
+    }
+
+    exit;
+}
 require_once __DIR__ . "/views/errors/404.php";
