@@ -110,7 +110,7 @@ require_once __DIR__ . "/../partials/sidebar.php";
                                 <tr>
 
                                     <td
-                                        colspan="5"
+                                        colspan="6"
                                         class="text-center">
 
                                         No users found
@@ -189,6 +189,33 @@ require_once __DIR__ . "/../partials/sidebar.php";
                                                 Edit
 
                                             </a>
+
+                                            <form
+                                                method="POST"
+                                                action="index.php?page=users&action=toggle"
+                                                style="display:inline;">
+
+                                                <input
+                                                    type="hidden"
+                                                    name="csrf_token"
+                                                    value="<?= CSRF::generateToken() ?>">
+
+                                                <input
+                                                    type="hidden"
+                                                    name="id"
+                                                    value="<?= $user["id"] ?>">
+
+                                                <button
+                                                    type="submit"
+                                                    class="btn btn-secondary btn-sm">
+
+                                                    <?= (int)$user["is_active"] === 1
+                                                        ? "Deactivate"
+                                                        : "Activate" ?>
+
+                                                </button>
+
+                                            </form>
 
                                         </td>
 

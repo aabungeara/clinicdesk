@@ -22,9 +22,9 @@ class UserController
 
     public function index(): void
     {
-        
+
         Auth::requireRole("admin");
-        
+
         $page = max(
             1,
             (int)($_GET["p"] ?? 1)
@@ -37,7 +37,7 @@ class UserController
                 $page,
                 $role
             );
-            
+
 
         require_once __DIR__
             . "/../views/users/index.php";
@@ -46,11 +46,11 @@ class UserController
     public function create(): void
     {
         Auth::requireRole("admin");
-    
+
         $specializations =
             $this->specializationModel
-                ->getAll();
-        
+            ->getAll();
+
         require_once __DIR__
             . "/../views/users/create.php";
     }
@@ -111,16 +111,16 @@ class UserController
             $this->doctorModel->create([
                 "user_id" => $userId,
                 "specialization_id" =>
-                    (int)$_POST["specialization_id"],
+                (int)$_POST["specialization_id"],
                 "consultation_fee" =>
-                    $_POST["consultation_fee"],
+                $_POST["consultation_fee"],
                 "available_days" =>
-                    implode(
-                        ",",
-                        $_POST["available_days"] ?? []
-                    ),
+                implode(
+                    ",",
+                    $_POST["available_days"] ?? []
+                ),
                 "bio" =>
-                    trim($_POST["bio"] ?? "")
+                trim($_POST["bio"] ?? "")
             ]);
         }
 
@@ -133,70 +133,122 @@ class UserController
     }
 
     public function edit(): void
-{
-    Auth::requireRole("admin");
+    {
+        Auth::requireRole("admin");
 
-    $id = (int)($_GET["id"] ?? 0);
+        $id = (int)($_GET["id"] ?? 0);
 
-    $user =
-        $this->userModel
+        $user =
+            $this->userModel
             ->findById($id);
 
-    if (!$user) {
+        if (!$user) {
+
+            $_SESSION["flash"] =
+                "User not found";
+
+
+            redirect(
+                "index.php?page=users"
+            );
+        }
+
+
+        require_once __DIR__
+            . "/../views/users/edit.php";
+    }
+    public function update(): void
+    {
+        Auth::requireRole("admin");
+
+        if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+            redirect("index.php?page=users");
+        }
+
+        if (
+            !CSRF::validateToken(
+                $_POST["csrf_token"] ?? ""
+            )
+        ) {
+            die("Invalid CSRF Token");
+        }
+
+        $id = (int)$_POST["id"];
+
+        $success =
+            $this->userModel->update(
+                $id,
+                [
+                    "name" =>
+                    trim($_POST["name"]),
+
+                    "phone" =>
+                    trim($_POST["phone"]),
+
+                    "avatar" =>
+                    null
+                ]
+            );
 
         $_SESSION["flash"] =
-            "User not found";
-
+            $success
+            ? "User updated successfully"
+            : "Update failed";
 
         redirect(
             "index.php?page=users"
         );
     }
-    
 
-    require_once __DIR__
-        . "/../views/users/edit.php";
-} 
-    public function update(): void
-{
-    Auth::requireRole("admin");
+    public function toggle(): void
 
-    if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-        redirect("index.php?page=users");
-    }
+    {
+//         echo "<pre>";
 
-    if (
-        !CSRF::validateToken(
-            $_POST["csrf_token"] ?? ""
-        )
-    ) {
-        die("Invalid CSRF Token");
-    }
+// echo "POST TOKEN:\n";
+// var_dump($_POST["csrf_token"] ?? null);
 
-    $id = (int)$_POST["id"];
+// echo "\nSESSION TOKEN:\n";
+// var_dump($_SESSION["csrf_token"] ?? null);
 
-    $success =
-        $this->userModel->update(
-            $id,
-            [
-                "name" =>
-                    trim($_POST["name"]),
+// exit;
+        Auth::requireRole("admin");
 
-                "phone" =>
-                    trim($_POST["phone"]),
+        if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+            redirect("index.php?page=users");
+        }
 
-                "avatar" =>
-                    null
-            ]
+        if (
+            !CSRF::validateToken(
+                $_POST["csrf_token"] ?? ""
+            )
+        ) {
+            die("Invalid CSRF Token");
+        }
+
+        $targetId = (int)($_POST["id"] ?? 0);
+
+        if (
+            Auth::currentUser()["id"]
+            === $targetId
+        ) {
+
+            $_SESSION["flash"] =
+                "You cannot deactivate your own account.";
+
+            redirect(
+                "index.php?page=users"
+            );
+        }
+
+        $this->userModel
+            ->toggleActive($targetId);
+
+        $_SESSION["flash"] =
+            "User status updated.";
+
+        redirect(
+            "index.php?page=users"
         );
-
-    $_SESSION["flash"] =
-        $success
-        ? "User updated successfully"
-        : "Update failed";
-
-    redirect(
-        "index.php?page=users"
-    );
-}
+    }
 }

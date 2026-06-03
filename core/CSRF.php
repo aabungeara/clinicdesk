@@ -4,15 +4,23 @@ class CSRF
 {
     public static function generateToken(): string
     {
-        $token = bin2hex(random_bytes(32));
+        if (
+            empty($_SESSION["csrf_token"])
+        ) {
 
-        $_SESSION["csrf_token"] = $token;
+            $_SESSION["csrf_token"] =
+                bin2hex(
+                    random_bytes(32)
+                );
+        }
 
-        return $token;
+        return $_SESSION["csrf_token"];
     }
 
-    public static function validateToken(string $token): bool
-    {
+    public static function validateToken(
+        string $token
+    ): bool {
+
         if (
             !isset($_SESSION["csrf_token"])
         ) {
