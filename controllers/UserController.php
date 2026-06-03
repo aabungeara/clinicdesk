@@ -30,12 +30,18 @@ class UserController
             (int)($_GET["p"] ?? 1)
         );
 
-        $role = $_GET["role"] ?? "";
+        $role = trim(
+            $_GET["role"] ?? ""
+        );
+        $search = trim(
+            $_GET["search"] ?? ""
+        );
 
         $users = $this->userModel
             ->getAllPaginated(
                 $page,
-                $role
+                $role,
+                $search
             );
 
 
@@ -203,15 +209,6 @@ class UserController
     public function toggle(): void
 
     {
-//         echo "<pre>";
-
-// echo "POST TOKEN:\n";
-// var_dump($_POST["csrf_token"] ?? null);
-
-// echo "\nSESSION TOKEN:\n";
-// var_dump($_SESSION["csrf_token"] ?? null);
-
-// exit;
         Auth::requireRole("admin");
 
         if ($_SERVER["REQUEST_METHOD"] !== "POST") {

@@ -88,43 +88,63 @@ class UserModel extends BaseModel
 
     public function getAllPaginated(
         int $page,
-        string $role = ""
+        string $role = "",
+        string $search = ""
     ): array {
 
         $offset =
-            max(0, $page - 1)
+            ($page - 1)
             * ITEMS_PER_PAGE;
+
+        $sql =
+            "SELECT *
+         FROM users
+         WHERE 1=1";
+
+        $types = "";
+        $params = [];
 
         if ($role !== "") {
 
-            $result = $this->execute(
-                "SELECT *
-                 FROM users
-                 WHERE role=?
-                 LIMIT ?
-                 OFFSET ?",
-                "sii",
-                [
-                    $role,
-                    ITEMS_PER_PAGE,
-                    $offset
-                ]
-            );
+            $sql .= " AND role=?";
 
-        } else {
-
-            $result = $this->execute(
-                "SELECT *
-                 FROM users
-                 LIMIT ?
-                 OFFSET ?",
-                "ii",
-                [
-                    ITEMS_PER_PAGE,
-                    $offset
-                ]
-            );
+            $types .= "s";
+            $params[] = $role;
         }
+
+        if ($search !== "") {
+
+            $sql .= "
+            AND (
+                name LIKE ?
+                OR email LIKE ?
+            )";
+
+            $types .= "ss";
+
+            $keyword =
+                "%" . $search . "%";
+
+            $params[] = $keyword;
+            $params[] = $keyword;
+        }
+
+        $sql .= "
+        ORDER BY id DESC
+        LIMIT ?
+        OFFSET ?";
+
+        $types .= "ii";
+
+        $params[] = ITEMS_PER_PAGE;
+        $params[] = $offset;
+
+        $result =
+            $this->execute(
+                $sql,
+                $types,
+                $params
+            );
 
         return $result->fetch_all(
             MYSQLI_ASSOC
@@ -132,30 +152,53 @@ class UserModel extends BaseModel
     }
 
     public function countAll(
-        string $role = ""
+        string $role = "",
+        string $search = ""
     ): int {
+
+        $sql =
+            "SELECT COUNT(*) total
+         FROM users
+         WHERE 1=1";
+
+        $types = "";
+        $params = [];
 
         if ($role !== "") {
 
-            $result = $this->execute(
-                "SELECT COUNT(*) total
-                 FROM users
-                 WHERE role=?",
-                "s",
-                [$role]
-            );
+            $sql .= " AND role=?";
 
-        } else {
-
-            $result = $this->execute(
-                "SELECT COUNT(*) total
-                 FROM users"
-            );
+            $types .= "s";
+            $params[] = $role;
         }
 
-        return (int)(
-            $result->fetch_assoc()
-        )["total"];
+        if ($search !== "") {
+
+            $sql .= "
+            AND (
+                name LIKE ?
+                OR email LIKE ?
+            )";
+
+            $types .= "ss";
+
+            $keyword =
+                "%" . $search . "%";
+
+            $params[] = $keyword;
+            $params[] = $keyword;
+        }
+
+        $result =
+            $this->execute(
+                $sql,
+                $types,
+                $params
+            );
+
+        return (int)
+        $result
+            ->fetch_assoc()["total"];
     }
 
     public function toggleActive(

@@ -86,6 +86,89 @@ require_once __DIR__ . "/../partials/sidebar.php";
 
                     <?php endif; ?>
 
+                    <form
+                        method="GET"
+                        class="mb-3">
+
+                        <input
+                            type="hidden"
+                            name="page"
+                            value="users">
+
+                        <div class="row">
+
+                            <div class="col-md-4">
+
+                                <input
+                                    type="text"
+                                    name="search"
+                                    class="form-control"
+                                    placeholder="Search name or email"
+                                    value="<?= htmlspecialchars(
+                                                $_GET["search"] ?? ""
+                                            ) ?>">
+
+                            </div>
+
+                            <div class="col-md-3">
+
+                                <select
+                                    name="role"
+                                    class="form-control">
+
+                                    <option value="">
+                                        All Roles
+                                    </option>
+
+                                    <option
+                                        value="admin"
+                                        <?= ($_GET["role"] ?? "") === "admin"
+                                            ? "selected"
+                                            : "" ?>>
+
+                                        Admin
+
+                                    </option>
+
+                                    <option
+                                        value="doctor"
+                                        <?= ($_GET["role"] ?? "") === "doctor"
+                                            ? "selected"
+                                            : "" ?>>
+
+                                        Doctor
+
+                                    </option>
+
+                                    <option
+                                        value="patient"
+                                        <?= ($_GET["role"] ?? "") === "patient"
+                                            ? "selected"
+                                            : "" ?>>
+
+                                        Patient
+
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+                            <div class="col-md-2">
+
+                                <button
+                                    type="submit"
+                                    class="btn btn-primary">
+
+                                    Filter
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </form>
                     <table class="table table-bordered table-striped">
 
                         <thead>
