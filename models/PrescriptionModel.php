@@ -22,34 +22,35 @@ class PrescriptionModel extends BaseModel
             ?: null;
     }
 
-    public function create(
-        array $data
-    ): int {
+   public function create(
+    array $data
+): bool {
 
-        $this->execute(
-            "
-            INSERT INTO prescriptions
-            (
-                appointment_id,
-                diagnosis,
-                medications,
-                notes,
-                file_path
-            )
-            VALUES (?,?,?,?,?)
-            ",
-            "issss",
-            [
-                $data["appointment_id"],
-                $data["diagnosis"],
-                $data["medications"],
-                $data["notes"] ?? null,
-                $data["file_path"] ?? null
-            ]
-        );
-
-        return $this->db->lastInsertId();
-    }
+    return $this->execute(
+        "
+        INSERT INTO prescriptions
+        (
+            appointment_id,
+            diagnosis,
+            medications,
+            notes,
+            file_path
+        )
+        VALUES
+        (
+            ?,?,?,?,?
+        )
+        ",
+        "issss",
+        [
+            $data["appointment_id"],
+            $data["diagnosis"],
+            $data["medications"],
+            $data["notes"],
+            $data["file_path"]
+        ]
+    );
+}
 
     public function update(
         int $id,
@@ -79,7 +80,8 @@ class PrescriptionModel extends BaseModel
         return $result === true;
     }
 
-    public function getByPatient(int $patientId): array {
+    public function getByPatient(int $patientId): array
+    {
 
         $result = $this->execute(
             "
@@ -115,20 +117,38 @@ class PrescriptionModel extends BaseModel
     }
 
     public function existsByAppointment(
-    int $appointmentId
-): bool {
+        int $appointmentId
+    ): bool {
 
-    $result =
-        $this->execute(
-            "
+        $result =
+            $this->execute(
+                "
             SELECT id
             FROM prescriptions
             WHERE appointment_id=?
             ",
-            "i",
-            [$appointmentId]
-        );
+                "i",
+                [$appointmentId]
+            );
 
-    return $result->num_rows > 0;
-}
+        return $result->num_rows > 0;
+    }
+
+    public function exists(
+        int $appointmentId
+    ): bool {
+
+        $result =
+            $this->execute(
+                "
+            SELECT id
+            FROM prescriptions
+            WHERE appointment_id=?
+            ",
+                "i",
+                [$appointmentId]
+            );
+
+        return $result->num_rows > 0;
+    }
 }

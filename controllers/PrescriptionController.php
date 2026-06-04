@@ -3,15 +3,19 @@
 require_once __DIR__ . "/../core/Auth.php";
 require_once __DIR__ . "/../core/helpers.php";
 require_once __DIR__ . "/../models/PrescriptionModel.php";
+require_once __DIR__. "/../models/AppointmentModel.php";
 
 class PrescriptionController
 {
     private PrescriptionModel $prescriptionModel;
+    private AppointmentModel $appointmentModel;
 
     public function __construct()
     {
         $this->prescriptionModel =
             new PrescriptionModel();
+        $this->appointmentModel =
+            new AppointmentModel();
     }
 
     public function index(): void
@@ -37,7 +41,7 @@ class PrescriptionController
 
         $prescription =
             $this->prescriptionModel
-            ->findByAppointment(
+            ->findByAppointmentId(
                 $appointmentId
             );
 
@@ -56,14 +60,50 @@ class PrescriptionController
     }
 
     public function myPrescriptions(): void
+    {
+        Auth::requireRole(
+            "patient"
+        );
+
+        require_once __DIR__
+            . "/../views/prescriptions/index.php";
+    }
+
+    public function create(): void
 {
-    Auth::requireRole(
-        "patient"
-    );
+    Auth::requireRole("doctor");
+
+    $appointmentId =
+        (int)($_GET["id"] ?? 0);
+
+    if (
+        !$this->appointmentModel
+            ->canAddPrescription(
+                $appointmentId,
+                Auth::id()
+            )
+    ) {
+
+        require_once __DIR__
+            . "/../views/errors/403.php";
+
+        exit;
+    }
+
+    if (
+        $this->prescriptionModel
+            ->exists($appointmentId)
+    ) {
+
+        $_SESSION["flash"] =
+            "Prescription already exists";
+
+        redirect(
+            "index.php?page=appointments"
+        );
+    }
 
     require_once __DIR__
-        . "/../views/prescriptions/index.php";
+        . "/../views/prescriptions/create.php";
 }
-
-    
 }

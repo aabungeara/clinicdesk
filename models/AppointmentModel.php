@@ -469,4 +469,33 @@ class AppointmentModel extends BaseModel
 
         return $result === true;
     }
+
+    public function canAddPrescription(
+    int $appointmentId,
+    int $doctorUserId
+): bool {
+
+    $result =
+        $this->execute(
+            "
+            SELECT a.id
+            FROM appointments a
+
+            JOIN doctors d
+                ON a.doctor_id=d.id
+
+            WHERE
+                a.id=?
+            AND d.user_id=?
+            AND a.status='completed'
+            ",
+            "ii",
+            [
+                $appointmentId,
+                $doctorUserId
+            ]
+        );
+
+    return $result->num_rows > 0;
+}
 }
