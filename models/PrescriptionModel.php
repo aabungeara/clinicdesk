@@ -113,4 +113,22 @@ class PrescriptionModel extends BaseModel
             MYSQLI_ASSOC
         );
     }
+
+    public function existsByAppointment(
+    int $appointmentId
+): bool {
+
+    $result =
+        $this->execute(
+            "
+            SELECT id
+            FROM prescriptions
+            WHERE appointment_id=?
+            ",
+            "i",
+            [$appointmentId]
+        );
+
+    return $result->num_rows > 0;
+}
 }

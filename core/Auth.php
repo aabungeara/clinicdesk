@@ -43,26 +43,41 @@ class Auth
     }
 
     public static function requireRole(string ...$roles): void
-{
-    if (!self::check()) {
+    {
+        if (!self::check()) {
 
-        redirect(
-            "index.php?page=auth&action=login"
-        );
+            redirect(
+                "index.php?page=auth&action=login"
+            );
+        }
+
+        if (
+            !in_array(
+                self::role(),
+                $roles,
+                true
+            )
+        ) {
+
+            require_once __DIR__
+                . "/../views/errors/403.php";
+
+            exit;
+        }
     }
 
-    if (
-        !in_array(
-            self::role(),
-            $roles,
-            true
-        )
-    ) {
-
-        require_once __DIR__
-            . "/../views/errors/403.php";
-
-        exit;
+    public static function id(): ?int
+    {
+        return $_SESSION["user"]["id"] ?? null;
     }
-}
+
+    public static function requireLogin(): void
+    {
+        if (!self::check()) {
+
+            redirect(
+                "index.php?page=auth&action=login"
+            );
+        }
+    }
 }

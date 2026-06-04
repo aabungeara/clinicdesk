@@ -31,7 +31,6 @@ class AppointmentModel extends BaseModel
             );
 
             return true;
-
         } catch (Throwable $e) {
 
             return false;
@@ -67,65 +66,78 @@ class AppointmentModel extends BaseModel
         array $filters,
         array &$params,
         string &$types
-    ): string {
+    ): array {
 
-        $where = [];
+        $conditions = [];
 
         if (!empty($filters["doctor_id"])) {
-            $where[] =
-                "doctor_id=?";
+
+            $conditions[] = "doctor_id=?";
+
             $types .= "i";
-            $params[] =
-                $filters["doctor_id"];
+
+            $params[] = $filters["doctor_id"];
         }
 
         if (!empty($filters["status"])) {
-            $where[] =
-                "status=?";
+
+            $conditions[] = "status=?";
+
             $types .= "s";
-            $params[] =
-                $filters["status"];
+
+            $params[] = $filters["status"];
         }
 
         if (!empty($filters["date_from"])) {
-            $where[] =
-                "appt_date>=?";
+
+            $conditions[] = "appt_date>=?";
+
             $types .= "s";
-            $params[] =
-                $filters["date_from"];
+
+            $params[] = $filters["date_from"];
         }
 
         if (!empty($filters["date_to"])) {
-            $where[] =
-                "appt_date<=?";
+
+            $conditions[] = "appt_date<=?";
+
             $types .= "s";
-            $params[] =
-                $filters["date_to"];
+
+            $params[] = $filters["date_to"];
         }
 
-        return count($where)
-            ? " WHERE "
-              . implode(
-                  " AND ",
-                  $where
-                )
-            : "";
+        return $conditions;
     }
-
     public function getByPatient(
         int $patientId,
         int $page,
         array $filters
     ): array {
 
+        $conditions = ["patient_id=?"];
+
         $params = [$patientId];
+
         $types = "i";
 
-        $where =
+        $extra =
             $this->buildFilters(
                 $filters,
                 $params,
                 $types
+            );
+
+        $conditions =
+            array_merge(
+                $conditions,
+                $extra
+            );
+
+        $where =
+            "WHERE "
+            . implode(
+                " AND ",
+                $conditions
             );
 
         $offset =
@@ -143,14 +155,30 @@ class AppointmentModel extends BaseModel
         $result =
             $this->execute(
                 "
-                SELECT *
-                FROM appointments
-                WHERE patient_id=?
-                $where
-                ORDER BY appt_date DESC
-                LIMIT ?
-                OFFSET ?
-                ",
+            SELECT
+                a.*,
+                du.name AS doctor_name,
+                s.name AS specialization_name
+            FROM appointments a
+
+            JOIN doctors d
+                ON a.doctor_id = d.id
+
+            JOIN users du
+                ON d.user_id = du.id
+
+            JOIN specializations s
+                ON d.specialization_id = s.id
+
+            $where
+
+            ORDER BY
+                a.appt_date DESC,
+                a.appt_time DESC
+
+            LIMIT ?
+            OFFSET ?
+            ",
                 $types,
                 $params
             );
@@ -183,12 +211,24 @@ class AppointmentModel extends BaseModel
         $params = [];
         $types = "";
 
-        $where =
+        $conditions =
             $this->buildFilters(
                 $filters,
                 $params,
                 $types
             );
+
+        $where = "";
+
+        if (!empty($conditions)) {
+
+            $where =
+                "WHERE "
+                . implode(
+                    " AND ",
+                    $conditions
+                );
+        }
 
         $offset =
             ($page - 1)
@@ -205,32 +245,28 @@ class AppointmentModel extends BaseModel
         $result =
             $this->execute(
                 "
-                SELECT
-                    a.*,
+            SELECT
+                a.*,
+                p.name AS patient_name,
+                du.name AS doctor_name
+            FROM appointments a
 
-                    p.name AS patient_name,
+            JOIN users p
+                ON a.patient_id=p.id
 
-                    du.name AS doctor_name
+            JOIN doctors d
+                ON a.doctor_id=d.id
 
-                FROM appointments a
+            JOIN users du
+                ON d.user_id=du.id
 
-                JOIN users p
-                    ON a.patient_id=p.id
+            $where
 
-                JOIN doctors d
-                    ON a.doctor_id=d.id
+            ORDER BY a.appt_date DESC
 
-                JOIN users du
-                    ON d.user_id=du.id
-
-                $where
-
-                ORDER BY
-                a.appt_date DESC
-
-                LIMIT ?
-                OFFSET ?
-                ",
+            LIMIT ?
+            OFFSET ?
+            ",
                 $types,
                 $params
             );
@@ -246,61 +282,79 @@ class AppointmentModel extends BaseModel
         array $filters
     ): int {
 
-        $where =
-            "";
+        $conditions = [];
 
         $params = [];
+
         $types = "";
 
-        if (
-            $scope === "patient"
-        ) {
+        if ($scope === "patient") {
 
-            $where =
-                " WHERE patient_id=? ";
+            $conditions[] =
+                "patient_id=?";
 
             $params[] =
                 $scopeId;
 
             $types .= "i";
-
         }
 
-        if (
-            $scope === "doctor"
-        ) {
+        if ($scope === "doctor") {
 
-            $where =
-                " WHERE doctor_id=? ";
+            $conditions[] =
+                "doctor_id=?";
 
             $params[] =
                 $scopeId;
 
             $types .= "i";
+        }
 
+        $extra =
+            $this->buildFilters(
+                $filters,
+                $params,
+                $types
+            );
+
+        $conditions =
+            array_merge(
+                $conditions,
+                $extra
+            );
+
+        $where = "";
+
+        if (!empty($conditions)) {
+
+            $where =
+                "WHERE "
+                . implode(
+                    " AND ",
+                    $conditions
+                );
         }
 
         $result =
             $this->execute(
                 "
-                SELECT COUNT(*) total
-                FROM appointments
-                $where
-                ",
+            SELECT COUNT(*) AS total
+            FROM appointments
+            $where
+            ",
                 $types,
                 $params
             );
 
         return (int)
         $result
-        ->fetch_assoc()
-        ["total"];
+            ->fetch_assoc()["total"];
     }
 
     public function updateStatus(
         int $id,
         string $status,
-        string $notes=""
+        string $notes = ""
     ): bool {
 
         $result =
@@ -357,8 +411,62 @@ class AppointmentModel extends BaseModel
             );
 
         return
-        $result
-        ->fetch_assoc()
-        ?: null;
+            $result
+            ->fetch_assoc()
+            ?: null;
+    }
+
+
+    public function create(
+        array $data
+    ): bool {
+
+        $result =
+            $this->execute(
+                "
+            INSERT INTO appointments
+            (
+                patient_id,
+                doctor_id,
+                appt_date,
+                appt_time,
+                reason,
+                status
+            )
+            VALUES
+            (
+                ?,?,?,?,?,
+                'pending'
+            )
+            ",
+                "iisss",
+                [
+                    $data["patient_id"],
+                    $data["doctor_id"],
+                    $data["appt_date"],
+                    $data["appt_time"],
+                    $data["reason"]
+                ]
+            );
+
+        return $result === true;
+    }
+
+    public function cancel(
+        int $id
+    ): bool {
+
+        $result =
+            $this->execute(
+                "
+            UPDATE appointments
+            SET status='cancelled'
+            WHERE id=?
+            ",
+                "i",
+                [$id]
+            );
+
+        return $result === true;
     }
 }

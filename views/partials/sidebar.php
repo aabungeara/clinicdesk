@@ -75,7 +75,91 @@
 
                         </a>
                     </li>
+
                 <?php endif; ?>
+                <?php if (
+                    Auth::check() &&
+                    Auth::role() === "patient"
+                ): ?>
+                    <li class="nav-item">
+
+                        <a
+                            href="index.php?page=appointments&action=book"
+                            class="nav-link">
+
+                            <i class="nav-icon fas fa-calendar-plus"></i>
+
+                            <p>
+                                Book Appointment
+                            </p>
+
+                        </a>
+
+                    </li>
+
+                    <li class="nav-item">
+
+                        <a
+                            href="index.php?page=appointments&action=myAppointments"
+                            class="nav-link">
+
+                            <i class="nav-icon fas fa-calendar-check"></i>
+
+                            <p>
+                                My Appointments
+                            </p>
+
+                        </a>
+
+                    </li>
+
+                <?php endif; ?>
+
+                <?php if (
+    Auth::check() &&
+    Auth::role() === "doctor"
+): ?>
+
+<li class="nav-item">
+
+    <a
+        href="index.php?page=prescriptions"
+        class="nav-link">
+
+        <i class="nav-icon fas fa-file-medical"></i>
+
+        <p>
+            Prescriptions
+        </p>
+
+    </a>
+
+</li>
+
+<?php endif; ?>
+
+<?php if (
+    Auth::check() &&
+    Auth::role() === "patient"
+): ?>
+
+<li class="nav-item">
+
+    <a
+        href="index.php?page=prescriptions&action=myPrescriptions"
+        class="nav-link">
+
+        <i class="nav-icon fas fa-file-prescription"></i>
+
+        <p>
+            My Prescriptions
+        </p>
+
+    </a>
+
+</li>
+
+<?php endif; ?>
 
             </ul>
 

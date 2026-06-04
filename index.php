@@ -129,4 +129,61 @@ if ($page === "specializations") {
 
     exit;
 }
+if ($page === "appointments") {
+
+    require_once __DIR__
+        . "/controllers/AppointmentController.php";
+
+    $controller =
+        new AppointmentController();
+
+    $action =
+        $_GET["action"] ?? "book";
+
+    if (
+        method_exists(
+            $controller,
+            $action
+        )
+    ) {
+
+        $controller->$action();
+
+    } else {
+
+        require_once __DIR__
+            . "/views/errors/404.php";
+    }
+
+    exit;
+}
+
+if ($page === "prescriptions") {
+
+    require_once __DIR__
+        . "/controllers/PrescriptionController.php";
+
+    $controller =
+        new PrescriptionController();
+
+    $action =
+        $_GET["action"] ?? "index";
+
+    if (
+        method_exists(
+            $controller,
+            $action
+        )
+    ) {
+
+        $controller->$action();
+
+    } else {
+
+        require_once __DIR__
+            . "/views/errors/404.php";
+    }
+
+    exit;
+}
 require_once __DIR__ . "/views/errors/404.php";
