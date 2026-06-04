@@ -50,6 +50,7 @@ class PrescriptionModel extends BaseModel
             $data["file_path"]
         ]
     );
+    return $result === true;
 }
 
     public function update(

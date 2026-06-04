@@ -74,29 +74,24 @@ class PrescriptionController
     Auth::requireRole("doctor");
 
     $appointmentId =
-        (int)($_GET["id"] ?? 0);
+        (int)($_GET["appointment_id"] ?? 0);
+
+    $appointmentModel =
+        new AppointmentModel();
+
+    $appointment =
+        $appointmentModel
+        ->findById(
+            $appointmentId
+        );
 
     if (
-        !$this->appointmentModel
-            ->canAddPrescription(
-                $appointmentId,
-                Auth::id()
-            )
+        !$appointment ||
+        $appointment["status"] !== "completed"
     ) {
 
-        require_once __DIR__
-            . "/../views/errors/403.php";
-
-        exit;
-    }
-
-    if (
-        $this->prescriptionModel
-            ->exists($appointmentId)
-    ) {
-
-        $_SESSION["flash"] =
-            "Prescription already exists";
+        $_SESSION["flash_error"] =
+            "Appointment not completed";
 
         redirect(
             "index.php?page=appointments"
@@ -105,5 +100,46 @@ class PrescriptionController
 
     require_once __DIR__
         . "/../views/prescriptions/create.php";
+}
+
+public function store(): void
+{
+    Auth::requireRole("doctor");
+
+    if (
+        !CSRF::validateToken(
+            $_POST["csrf_token"] ?? ""
+        )
+    ) {
+
+        die("Invalid CSRF");
+    }
+
+    $data = [
+
+        "appointment_id" =>
+            (int)$_POST["appointment_id"],
+
+        "diagnosis" =>
+            trim($_POST["diagnosis"]),
+
+        "medications" =>
+            trim($_POST["medications"]),
+
+        "notes" =>
+            trim($_POST["notes"]),
+
+        "file_path" => null
+    ];
+
+    $this->prescriptionModel
+        ->create($data);
+
+    $_SESSION["flash_success"] =
+        "Prescription created";
+
+    redirect(
+        "index.php?page=appointments"
+    );
 }
 }

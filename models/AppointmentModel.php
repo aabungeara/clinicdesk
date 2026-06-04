@@ -498,4 +498,23 @@ class AppointmentModel extends BaseModel
 
     return $result->num_rows > 0;
 }
+
+public function prescriptionExists(
+    int $appointmentId
+): bool {
+
+    $result =
+        $this->execute(
+            "
+            SELECT id
+            FROM prescriptions
+            WHERE appointment_id=?
+            ",
+            "i",
+            [$appointmentId]
+        );
+
+    return
+        $result->num_rows > 0;
+}
 }

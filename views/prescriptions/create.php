@@ -35,7 +35,7 @@ require_once __DIR__ . "/../partials/sidebar.php";
                 <input
                     type="hidden"
                     name="appointment_id"
-                    value="<?= $appointmentId ?? (int)($_GET['id'] ?? 0)?>">
+                    value="<?= $appointment["id"] ?? 0 ?>">
 
                 <div class="card-body">
 
