@@ -188,18 +188,77 @@ class AppointmentModel extends BaseModel
         );
     }
 
+
     public function getByDoctor(
         int $doctorId,
         int $page,
         array $filters
     ): array {
 
-        $filters["doctor_id"] =
-            $doctorId;
+        $conditions = ["a.doctor_id=?"];
 
-        return $this->getAll(
-            $page,
-            $filters
+        $params = [$doctorId];
+
+        $types = "i";
+
+        $extra =
+            $this->buildFilters(
+                $filters,
+                $params,
+                $types
+            );
+
+        $conditions =
+            array_merge(
+                $conditions,
+                $extra
+            );
+
+        $where =
+            "WHERE "
+            . implode(
+                " AND ",
+                $conditions
+            );
+
+        $offset =
+            ($page - 1)
+            * ITEMS_PER_PAGE;
+
+        $types .= "ii";
+
+        $params[] =
+            ITEMS_PER_PAGE;
+
+        $params[] =
+            $offset;
+
+        $result =
+            $this->execute(
+                "
+            SELECT
+                a.*,
+                p.name AS patient_name
+            FROM appointments a
+
+            JOIN users p
+                ON a.patient_id = p.id
+
+            $where
+
+            ORDER BY
+                a.appt_date DESC,
+                a.appt_time DESC
+
+            LIMIT ?
+            OFFSET ?
+            ",
+                $types,
+                $params
+            );
+
+        return $result->fetch_all(
+            MYSQLI_ASSOC
         );
     }
 
@@ -471,13 +530,13 @@ class AppointmentModel extends BaseModel
     }
 
     public function canAddPrescription(
-    int $appointmentId,
-    int $doctorUserId
-): bool {
+        int $appointmentId,
+        int $doctorUserId
+    ): bool {
 
-    $result =
-        $this->execute(
-            "
+        $result =
+            $this->execute(
+                "
             SELECT a.id
             FROM appointments a
 
@@ -489,32 +548,130 @@ class AppointmentModel extends BaseModel
             AND d.user_id=?
             AND a.status='completed'
             ",
-            "ii",
-            [
-                $appointmentId,
-                $doctorUserId
-            ]
-        );
+                "ii",
+                [
+                    $appointmentId,
+                    $doctorUserId
+                ]
+            );
 
-    return $result->num_rows > 0;
-}
+        return $result->num_rows > 0;
+    }
 
-public function prescriptionExists(
-    int $appointmentId
-): bool {
+    public function prescriptionExists(
+        int $appointmentId
+    ): bool {
 
-    $result =
-        $this->execute(
-            "
+        $result =
+            $this->execute(
+                "
             SELECT id
             FROM prescriptions
             WHERE appointment_id=?
             ",
-            "i",
-            [$appointmentId]
-        );
+                "i",
+                [$appointmentId]
+            );
 
-    return
-        $result->num_rows > 0;
-}
+        return
+            $result->num_rows > 0;
+    }
+
+    public function getTodayAppointments(
+        int $doctorId
+    ): array {
+
+        $today =
+            date("Y-m-d");
+
+        $result =
+            $this->execute(
+                "
+            SELECT
+                a.*,
+                u.name AS patient_name
+            FROM appointments a
+
+            JOIN users u
+                ON a.patient_id=u.id
+
+            WHERE
+                a.doctor_id=?
+            AND
+                a.appt_date=?
+
+            ORDER BY
+                a.appt_time ASC
+            ",
+                "is",
+                [
+                    $doctorId,
+                    $today
+                ]
+            );
+
+        return
+            $result->fetch_all(
+                MYSQLI_ASSOC
+            );
+    }
+
+    public function getTodayByDoctor(
+        int $doctorId
+    ): array {
+
+        $result =
+            $this->execute(
+                "
+            SELECT
+                a.*,
+                u.name AS patient_name
+            FROM appointments a
+
+            JOIN users u
+                ON a.patient_id=u.id
+
+            WHERE a.doctor_id=?
+            AND a.appt_date=CURDATE()
+
+            ORDER BY a.appt_time
+            ",
+                "i",
+                [$doctorId]
+            );
+
+        return $result->fetch_all(
+            MYSQLI_ASSOC
+        );
+    }
+
+    public function confirm(
+        int $id
+    ): bool {
+
+        return $this->execute(
+            "
+        UPDATE appointments
+        SET status='confirmed'
+        WHERE id=?
+        ",
+            "i",
+            [$id]
+        );
+    }
+
+    public function complete(
+        int $id
+    ): bool {
+
+        return $this->execute(
+            "
+        UPDATE appointments
+        SET status='completed'
+        WHERE id=?
+        ",
+            "i",
+            [$id]
+        );
+    }
 }

@@ -1,73 +1,141 @@
 <?php
 
-$pageTitle = "Prescription";
+$pageTitle = "Prescription Details";
 
-require_once __DIR__
-    . "/../partials/header.php";
-
-require_once __DIR__
-    . "/../partials/navbar.php";
-
-require_once __DIR__
-    . "/../partials/sidebar.php";
+require_once __DIR__ . "/../partials/header.php";
+require_once __DIR__ . "/../partials/navbar.php";
+require_once __DIR__ . "/../partials/sidebar.php";
 
 ?>
 
 <div class="content-wrapper">
 
-    <section class="content p-3">
+    <section class="content-header">
 
-        <div class="card">
+        <div class="container-fluid">
 
-            <div class="card-header">
+            <div class="row mb-2">
 
-                <h3>
-                    Prescription Details
-                </h3>
+                <div class="col-sm-6">
+
+                    <h1>
+                        Prescription Details
+                    </h1>
+
+                </div>
 
             </div>
 
-            <div class="card-body">
+        </div>
 
-                <p>
-                    Diagnosis:
-                </p>
+    </section>
 
-                <div class="border p-2 mb-3">
+    <section class="content">
 
-                    <?= nl2br(
-                        htmlspecialchars(
-                            $prescription["diagnosis"]
-                        )
-                    ) ?>
+        <div class="container-fluid">
 
-                </div>
+            <div class="card card-primary">
 
-                <p>
-                    Medications:
-                </p>
+                <div class="card-header">
 
-                <div class="border p-2 mb-3">
+                    <h3 class="card-title">
 
-                    <?= nl2br(
-                        htmlspecialchars(
-                            $prescription["medications"]
-                        )
-                    ) ?>
+                        <i class="fas fa-file-medical"></i>
+                        Prescription Information
+
+                    </h3>
 
                 </div>
 
-                <p>
-                    Notes:
-                </p>
+                <div class="card-body">
 
-                <div class="border p-2">
+                    <div class="mb-4">
 
-                    <?= nl2br(
-                        htmlspecialchars(
-                            $prescription["notes"] ?? ""
+                        <h5 class="font-weight-bold">
+                            Diagnosis
+                        </h5>
+
+                        <div class="border rounded p-3 bg-light">
+
+                            <?= nl2br(
+                                htmlspecialchars(
+                                    $prescription["diagnosis"]
+                                )
+                            ) ?>
+
+                        </div>
+
+                    </div>
+
+                    <div class="mb-4">
+
+                        <h5 class="font-weight-bold">
+                            Medications
+                        </h5>
+
+                        <div class="border rounded p-3 bg-light">
+
+                            <?= nl2br(
+                                htmlspecialchars(
+                                    $prescription["medications"]
+                                )
+                            ) ?>
+
+                        </div>
+
+                    </div>
+
+                    <div class="mb-4">
+
+                        <h5 class="font-weight-bold">
+                            Doctor Notes
+                        </h5>
+
+                        <div class="border rounded p-3 bg-light">
+
+                            <?= nl2br(
+                                htmlspecialchars(
+                                    $prescription["notes"] ?? "No notes available"
+                                )
+                            ) ?>
+
+                        </div>
+
+                    </div>
+
+                    <?php if (
+                        !empty(
+                            $prescription["file_path"]
                         )
-                    ) ?>
+                    ): ?>
+
+                        <div class="mb-4">
+
+                            <h5 class="font-weight-bold">
+                                Attached PDF
+                            </h5>
+
+                            <a
+                                href="index.php?page=prescriptions&action=download&id=<?= $prescription["appointment_id"] ?>"
+                                class="btn btn-danger">
+
+                                <i class="fas fa-file-pdf"></i>
+                                Download Prescription PDF
+
+                            </a>
+
+                        </div>
+
+                    <?php endif; ?>
+
+                    <a
+                        href="javascript:history.back()"
+                        class="btn btn-secondary">
+
+                        <i class="fas fa-arrow-left"></i>
+                        Back
+
+                    </a>
 
                 </div>
 
@@ -82,3 +150,4 @@ require_once __DIR__
 <?php
 require_once __DIR__
     . "/../partials/footer.php";
+?>

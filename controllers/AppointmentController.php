@@ -216,4 +216,74 @@ class AppointmentController
             "index.php?page=appointments&action=myAppointments"
         );
     }
+    public function schedule(): void
+    {
+        Auth::requireRole("doctor");
+
+        $doctor =
+            $this->doctorModel
+            ->findByUserId(
+                Auth::id()
+            );
+
+        if (!$doctor) {
+
+            $_SESSION["flash"] =
+                "Doctor record not found";
+
+            redirect(
+                "index.php?page=dashboard"
+            );
+        }
+
+        $doctorId =
+            $doctor["id"];
+
+        $todayAppointments =
+            $this->appointmentModel
+            ->getTodayByDoctor(
+                $doctorId
+            );
+
+        $appointments =
+            $this->appointmentModel
+            ->getByDoctor(
+                $doctorId,
+                1,
+                []
+            );
+
+        require_once __DIR__
+            . "/../views/appointments/doctor_schedule.php";
+    }
+
+    public function confirm(): void
+    {
+        Auth::requireRole("doctor");
+
+        $id =
+            (int)($_GET["id"] ?? 0);
+
+        $this->appointmentModel
+            ->confirm($id);
+
+        redirect(
+            "index.php?page=appointments&action=schedule"
+        );
+    }
+
+    public function complete(): void
+    {
+        Auth::requireRole("doctor");
+
+        $id =
+            (int)($_GET["id"] ?? 0);
+
+        $this->appointmentModel
+            ->complete($id);
+
+        redirect(
+            "index.php?page=appointments&action=schedule"
+        );
+    }
 }

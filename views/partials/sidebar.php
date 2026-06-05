@@ -136,6 +136,22 @@
 
 </li>
 
+<li class="nav-item">
+
+    <a
+        href="index.php?page=appointments&action=schedule"
+        class="nav-link">
+
+        <i class="nav-icon fas fa-calendar-alt"></i>
+
+        <p>
+            My Schedule
+        </p>
+
+    </a>
+
+</li>
+
 <?php endif; ?>
 
 <?php if (
