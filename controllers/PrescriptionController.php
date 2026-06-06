@@ -4,19 +4,19 @@ require_once __DIR__ . "/../core/Auth.php";
 require_once __DIR__ . "/../core/helpers.php";
 require_once __DIR__ . "/../core/CSRF.php";
 require_once __DIR__ . "/../models/PrescriptionModel.php";
-require_once __DIR__ . "/../models/AppointmentModel.php";
+require_once __DIR__ . "/../models/AppAppointmentModel.php";
 require_once __DIR__ . "/../models/DoctorModel.php";
 
 class PrescriptionController
 {
     private PrescriptionModel $prescriptionModel;
-    private AppointmentModel $appointmentModel;
+    private AppAppointmentModel $appointmentModel;
     private DoctorModel $doctorModel;
 
     public function __construct()
     {
         $this->prescriptionModel = new PrescriptionModel();
-        $this->appointmentModel = new AppointmentModel();
+        $this->appointmentModel = new AppAppointmentModel();
         $this->doctorModel = new DoctorModel();
     }
 
@@ -71,7 +71,7 @@ class PrescriptionController
 
         $prescriptions = $this->prescriptionModel->getByPatient(Auth::id());
 
-        require_once __DIR__ . "/../views/prescriptions/index.php";
+        require_once __DIR__ . "/../views/prescriptions/my_prescriptions.php";
     }
 
     public function create(): void

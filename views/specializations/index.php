@@ -20,7 +20,7 @@ $specializations = $specializations ?? [];
 <div class="card-header">
 
 <h3 class="card-title">
-Specializationsءء   
+Specializations
 </h3>
 
 <a

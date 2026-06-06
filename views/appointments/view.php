@@ -6,6 +6,8 @@ require_once __DIR__ . "/../partials/header.php";
 require_once __DIR__ . "/../partials/navbar.php";
 require_once __DIR__ . "/../partials/sidebar.php";
 
+$appointment = $appointment ?? [];
+
 ?>
 
 <div class="content-wrapper">
@@ -92,7 +94,7 @@ require_once __DIR__ . "/../partials/sidebar.php";
             <div class="card-footer">
 
                 <a
-                    href="index.php?page=appointments&action=myAppointments"
+                    href="index.php?page=dashboard"
                     class="btn btn-secondary">
 
                     Back

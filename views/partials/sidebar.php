@@ -90,7 +90,7 @@
                     <li class="nav-item">
                         <a href="index.php?page=profile" class="nav-link">
                             <i class="nav-icon fas fa-user-cog"></i>
-                            <p>My Profile</p>
+                            <p>Edit Profile</p>
                         </a>
                     </li>
 

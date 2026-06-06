@@ -1,6 +1,6 @@
 <?php
 
-$pageTitle = "Edit User";
+$pageTitle = "Edit Profile";
 
 require_once __DIR__ . "/../partials/header.php";
 require_once __DIR__ . "/../partials/navbar.php";
@@ -14,17 +14,24 @@ $user = $user ?? [];
 
     <section class="content p-3">
 
+        <?php if (isset($_SESSION['flash'])): ?>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle"></i> <?= htmlspecialchars($_SESSION['flash']); ?>
+                <?php unset($_SESSION['flash']); ?>
+            </div>
+        <?php endif; ?>
+
         <div class="card">
 
             <div class="card-header">
 
-                <h3>Edit User</h3>
+                <h3>Edit Profile</h3>
 
             </div>
 
             <form
                 method="POST"
-                action="index.php?page=users&action=update">
+                action="index.php?page=profile&action=updateProfile">
 
                 <div class="card-body">
 
@@ -64,20 +71,19 @@ $user = $user ?? [];
                     </div>
 
                 </div>
-
-                <div class="card-footer">
+                <div class="card-footer d-flex">
 
                     <button
                         type="submit"
                         class="btn btn-success">
 
-                        Save
+                        Save Changes
 
                     </button>
 
                     <a
-                        href="index.php?page=users"
-                        class="btn btn-secondary">
+                        href="index.php?page=dashboard"
+                        class="btn btn-secondary ml-auto ms-auto">
 
                         Cancel
 

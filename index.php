@@ -138,7 +138,7 @@ if ($page === "appointments") {
         new AppointmentController();
 
     $action =
-        $_GET["action"] ?? "book";
+        $_GET["action"] ?? "index";
 
     if (
         method_exists(
@@ -186,4 +186,35 @@ if ($page === "prescriptions") {
 
     exit;
 }
+
+if ($page === "profile") {
+    require_once __DIR__ . "/controllers/UserController.php";
+    $controller = new UserController();
+    
+    $action = $_GET["action"] ?? "editProfile";
+
+    if (method_exists($controller, $action)) {
+        $controller->$action();
+    } else {
+        require_once __DIR__ . "/views/errors/404.php";
+    }
+    exit;
+}
+
+// === إضافة شرط صفحة التقارير لتوجيهها إلى الـ ReportController ===
+if ($page === "reports") {
+    require_once __DIR__ . "/controllers/ReportController.php";
+    
+    $controller = new ReportController();
+    $action = $_GET["action"] ?? "index";
+
+    if (method_exists($controller, $action)) {
+        $controller->$action();
+    } else {
+        require_once __DIR__ . "/views/errors/404.php";
+    }
+    exit;
+}
+
+// هذا هو السطر الأخير الموجود لديك بالفعل في أسفل الملف
 require_once __DIR__ . "/views/errors/404.php";

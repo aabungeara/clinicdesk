@@ -37,6 +37,18 @@ class AppointmentModel extends BaseModel
         }
     }
 
+    public function getAppointmentsReport(string $sql, string $types, array $params): array
+    {
+        // استدعاء الدالة المحمية execute الموروثة من BaseModel بشكل آمن تماماً
+        $result = $this->execute($sql, $types, $params);
+        
+        // التحقق من أن النتيجة كائن صالح يحتوي على مخرجات من قاعدة البيانات
+        if ($result && method_exists($result, 'fetch_all')) {
+            return $result->fetch_all(MYSQLI_ASSOC);
+        }
+        
+        return [];
+    }
     public function hasConflict(
         int $doctorId,
         string $date,
@@ -512,7 +524,7 @@ class AppointmentModel extends BaseModel
                     $data["doctor_id"],
                     $data["appt_date"],
                     $data["appt_time"],
-                    $data["reason"]
+                    $data["reason"] ?? null
                 ]
             );
 
@@ -800,4 +812,90 @@ class AppointmentModel extends BaseModel
         }
         return 0;
     }
+
+    private function buildAdminFilters(array $filters, array &$params, string &$types): array
+    {
+        $conditions = [];
+
+        if (!empty($filters['doctor_id'])) {
+            $conditions[] = "a.doctor_id = ?";
+            $types .= "i";
+            $params[] = $filters['doctor_id'];
+        }
+
+        if (!empty($filters['status'])) {
+            $conditions[] = "a.status = ?";
+            $types .= "s";
+            $params[] = $filters['status'];
+        }
+
+        if (!empty($filters['date_from'])) {
+            $conditions[] = "a.appt_date >= ?";
+            $types .= "s";
+            $params[] = $filters['date_from'];
+        }
+
+        if (!empty($filters['date_to'])) {
+            $conditions[] = "a.appt_date <= ?";
+            $types .= "s";
+            $params[] = $filters['date_to'];
+        }
+
+        if (!empty($filters['patient_name'])) {
+            $conditions[] = "p.name LIKE ?";
+            $types .= "s";
+            $params[] = "%" . trim($filters['patient_name']) . "%";
+        }
+
+        return $conditions;
+    }
+
+    public function getAllAppointmentsForAdmin(int $page, array $filters): array
+    {
+        $params = [];
+        $types = "";
+        $conditions = $this->buildAdminFilters($filters, $params, $types);
+        
+        $whereClause = !empty($conditions) ? "WHERE " . implode(" AND ", $conditions) : "";
+        $offset = ($page - 1) * ITEMS_PER_PAGE;
+
+        $types .= "ii";
+        $params[] = ITEMS_PER_PAGE;
+        $params[] = $offset;
+
+        $sql = "SELECT a.*, 
+                       p.name AS patient_name, 
+                       du.name AS doctor_name,
+                       s.name AS specialization_name
+                FROM appointments a
+                JOIN users p ON a.patient_id = p.id
+                JOIN doctors d ON a.doctor_id = d.id
+                JOIN users du ON d.user_id = du.id
+                JOIN specializations s ON d.specialization_id = s.id
+                $whereClause
+                ORDER BY a.appt_date DESC, a.appt_time DESC
+                LIMIT ? OFFSET ?";
+
+        $result = $this->execute($sql, $types, $params);
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
+    public function countAllAppointmentsForAdmin(array $filters): int
+    {
+        $params = [];
+        $types = "";
+        $conditions = $this->buildAdminFilters($filters, $params, $types);
+        
+        $whereClause = !empty($conditions) ? "WHERE " . implode(" AND ", $conditions) : "";
+
+        $sql = "SELECT COUNT(*) AS total 
+                FROM appointments a
+                JOIN users p ON a.patient_id = p.id
+                $whereClause";
+
+        $result = $this->execute($sql, $types, $params);
+        $row = $result->fetch_assoc();
+        return (int)($row['total'] ?? 0);
+    }
+
 }

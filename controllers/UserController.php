@@ -291,4 +291,59 @@ class UserController
             "index.php?page=users"
         );
     }
+
+    public function editProfile(): void
+    {
+        if (!Auth::check()) {
+            redirect("index.php?page=auth&action=login");
+        }
+
+        $currentUser = Auth::currentUser();
+        $id = (int)$currentUser["id"];
+
+        $user = $this->userModel->findById($id);
+
+        if (!$user) {
+            $_SESSION["flash"] = "User profile not found";
+            redirect("index.php?page=dashboard");
+        }
+
+        require __DIR__ . "/../views/users/edit_profile.php";
+    }
+
+    public function updateProfile(): void
+    {
+        if (!Auth::check()) {
+            redirect("index.php?page=auth&action=login");
+        }
+
+        if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+            redirect("index.php?page=dashboard");
+        }
+
+        if (!CSRF::validateToken($_POST["csrf_token"] ?? "")) {
+            die("Invalid CSRF Token");
+        }
+
+        $currentUser = Auth::currentUser();
+        $id = (int)$currentUser["id"];
+
+        $name = trim($_POST["name"] ?? "");
+        $phone = trim($_POST["phone"] ?? "");
+
+        $success = $this->userModel->update($id, [
+            "name"  => $name,
+            "phone" => $phone,
+            "avatar" => null
+        ]);
+
+        if ($success) {
+            $_SESSION["user"]["name"] = $name; 
+            $_SESSION["flash"] = "Profile updated successfully";
+        } else {
+            $_SESSION["flash"] = "Failed to update profile";
+        }
+
+        redirect("index.php?page=profile");
+    }
 }

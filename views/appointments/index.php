@@ -5,7 +5,19 @@ $pageTitle = "My Appointments";
 require_once __DIR__ . "/../partials/header.php";
 require_once __DIR__ . "/../partials/navbar.php";
 require_once __DIR__ . "/../partials/sidebar.php";
+require_once __DIR__ . "/../../models/AppAppointmentModel.php";
 
+$appointmentModel = new AppAppointmentModel();
+$appointments = $appointmentModel->getAllAppointmentsForAdmin(
+    1,
+    [
+        "patient_name" => $_GET["patient_name"] ?? "",
+        "doctor_id"    => $_GET["doctor_id"] ?? "",
+        "status"       => $_GET["status"] ?? "",
+        "date_from"    => $_GET["date_from"] ?? "",
+        "date_to"      => $_GET["date_to"] ?? ""
+    ]
+);
 ?>
 
 <div class="content-wrapper">
@@ -233,7 +245,7 @@ require_once __DIR__ . "/../partials/sidebar.php";
                                     <?php if (
                                         $appointment["status"] === "completed"
                                         &&
-                                        $appointment["has_prescription"?? false]
+                                        ($appointment["has_prescription"] ?? false)
                                     ): ?>
 
                                         <a

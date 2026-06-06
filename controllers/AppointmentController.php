@@ -4,26 +4,44 @@ require_once __DIR__ . "/../core/Auth.php";
 require_once __DIR__ . "/../core/CSRF.php";
 require_once __DIR__ . "/../core/helpers.php";
 
-require_once __DIR__ . "/../models/AppointmentModel.php";
+require_once __DIR__ . "/../models/AppAppointmentModel.php";
 require_once __DIR__ . "/../models/DoctorModel.php";
-require_once __DIR__
-    . "/../models/PrescriptionModel.php";
+require_once __DIR__ . "/../models/PrescriptionModel.php";
 
 class AppointmentController
 {
-    private AppointmentModel $appointmentModel;
+    private AppAppointmentModel $appointmentModel;
     private DoctorModel $doctorModel;
     private PrescriptionModel $prescriptionModel;
 
     public function __construct()
     {
         $this->appointmentModel =
-            new AppointmentModel();
+            new AppAppointmentModel();
 
         $this->doctorModel =
             new DoctorModel();
         $this->prescriptionModel =
             new PrescriptionModel();
+    }
+
+    public function index(): void
+    {
+        // التحقق أولاً من أن المستخدم مسجل دخوله في النظام
+        Auth::requireLogin();
+
+        $role = Auth::role();
+
+        if ($role === "admin") {
+            $this->adminIndex();
+        } elseif ($role === "doctor") {
+            $this->schedule();
+        } elseif ($role === "patient") {
+            $this->myAppointments();
+        } else {
+            // في حال وجود رتبة غير معروفة، يتم التحويل للوحة التحكم العامة
+            redirect("index.php?page=dashboard");
+        }
     }
 
     public function book(): void
@@ -42,6 +60,36 @@ class AppointmentController
     {
         $this->book();
     }
+
+    public function adminIndex(): void
+    {
+        Auth::requireRole("admin");
+
+        $page = max(1, (int)($_GET["p"] ?? 1));
+
+        $filters = [
+            'patient_name' => $_GET['patient_name'] ?? '',
+            'doctor_id'    => $_GET['doctor_id'] ?? '',
+            'status'       => $_GET['status'] ?? '',
+            'date_from'    => $_GET['date_from'] ?? '',
+            'date_to'      => $_GET['date_to'] ?? ''
+        ];
+
+        // Define ITEMS_PER_PAGE if not already defined
+        if (!defined('ITEMS_PER_PAGE')) {
+            define('ITEMS_PER_PAGE', 10); // Default value, adjust as needed
+        }
+
+        $appointments = $this->appointmentModel->getAllAppointmentsForAdmin($page, $filters);
+        $totalItems = $this->appointmentModel->countAllAppointmentsForAdmin($filters);
+        $totalPages = (int) ceil($totalItems / ITEMS_PER_PAGE);
+
+        $doctors = $this->doctorModel->getAllDoctors();
+        $stats = $this->appointmentModel->getAdminAppointmentStats();
+
+        require_once __DIR__ . "/../views/appointments/admin_index.php";
+    }
+
     public function myAppointments(): void
     {
         Auth::requireRole("patient");
@@ -215,7 +263,7 @@ class AppointmentController
         $role = Auth::role();
         $userId = Auth::id();
 
-       
+
         if ($role === "patient") {
             if ((int)$appointment["patient_id"] !== $userId) {
                 die("403 - Unauthorized Action");
@@ -225,14 +273,14 @@ class AppointmentController
                 redirect("index.php?page=appointments&action=myAppointments");
                 return;
             }
-            
+
             $this->appointmentModel->cancel($id);
             $_SESSION["flash"] = "Appointment cancelled successfully";
             redirect("index.php?page=appointments&action=myAppointments");
             return;
         }
 
-        
+
         if ($role === "doctor") {
             $doctor = $this->doctorModel->findByUserId($userId);
             if (!$doctor || (int)$appointment["doctor_id"] !== (int)$doctor["id"]) {
@@ -245,11 +293,11 @@ class AppointmentController
             return;
         }
 
-        
+
         if ($role === "admin") {
             $this->appointmentModel->cancel($id);
             $_SESSION["flash"] = "Appointment cancelled by admin";
-            redirect("index.php?page=appointments&action=all");
+            redirect("index.php?page=appointments&action=adminIndex"); // Changed redirect to adminIndex
             return;
         }
     }

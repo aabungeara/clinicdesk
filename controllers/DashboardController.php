@@ -2,15 +2,15 @@
 
 require_once __DIR__ . "/../core/Auth.php";
 require_once __DIR__ . "/../core/helpers.php";
-require_once __DIR__ . "/../models/AppointmentModel.php";
+require_once __DIR__ . "/../models/AppAppointmentModel.php";
 
 class DashboardController
 {
-    private AppointmentModel $appointmentModel;
+    private AppAppointmentModel $appointmentModel;
 
     public function __construct()
     {
-        $this->appointmentModel = new AppointmentModel();
+        $this->appointmentModel = new AppAppointmentModel();
     }
 
     public function index(): void
