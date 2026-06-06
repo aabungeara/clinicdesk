@@ -4,12 +4,10 @@ Auth::requireRole("patient");
 
 $pageTitle = "Patient Dashboard";
 
-// تضمين المكونات العلوية الموحدة للمشروع (الـ Navbar المطور والسايدبار المشترك)
 require_once __DIR__ . "/../partials/header.php";
 require_once __DIR__ . "/../partials/navbar.php";
 require_once __DIR__ . "/../partials/sidebar.php";
 
-// تهيئة المتغيرات القادمة من الـ Controller لضمان استقرار الصفحة
 $myAppointments = $myAppointments ?? [];
 $patientStats = $patientStats ?? ['total' => 0, 'pending' => 0, 'completed' => 0];
 
@@ -152,6 +150,5 @@ $patientStats = $patientStats ?? ['total' => 0, 'pending' => 0, 'completed' => 0
 </div>
 
 <?php
-// تضمين الفوتر المشترك للمشروع لإغلاق التاجات وتشغيل الـ JavaScript
 require_once __DIR__ . "/../partials/footer.php";
 ?>

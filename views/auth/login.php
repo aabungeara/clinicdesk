@@ -2,7 +2,6 @@
 
 $pageTitle = "Login";
 
-// تضمين الهيدر الذي يحتوي على ملفات CSS الخاصة بـ AdminLTE وبوتستراب
 require_once __DIR__ . "/../partials/header.php";
 ?>
 
@@ -55,7 +54,6 @@ require_once __DIR__ . "/../partials/header.php";
 </div>
 
 <?php
-// في صفحات الـ Login المستقلة يفضل إغلاق تاجات الجسم هكذا إذا لم يكن هناك فوتر مخصص
 ?>
 </body>
 </html>

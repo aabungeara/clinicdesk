@@ -1,0 +1,5 @@
+<FilesMatch "\.(pdf|PDF)$">
+    Require all denied
+</FilesMatch>
+
+Options -Indexes

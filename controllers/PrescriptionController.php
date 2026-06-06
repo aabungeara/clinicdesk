@@ -17,7 +17,7 @@ class PrescriptionController
     {
         $this->prescriptionModel = new PrescriptionModel();
         $this->appointmentModel = new AppointmentModel();
-        $this->doctorModel =new DoctorModel();
+        $this->doctorModel = new DoctorModel();
     }
 
     public function index(): void
@@ -86,6 +86,18 @@ class PrescriptionController
             $_SESSION["flash_error"] = "Appointment not completed";
             redirect("index.php?page=appointments&action=schedule");
         }
+        $doctor =
+            $this->doctorModel
+            ->findByUserId(Auth::id());
+
+        if (
+            !$doctor ||
+            (int)$appointment["doctor_id"]
+            !==
+            (int)$doctor["id"]
+        ) {
+            die("403 - Access Denied");
+        }
 
         $existing = $this->prescriptionModel->findByAppointmentId($appointmentId);
 
@@ -149,12 +161,31 @@ class PrescriptionController
 
         $id = (int)($_GET["id"] ?? 0);
         $prescription = $this->prescriptionModel->findById($id);
+        $appointment =
+            $this->appointmentModel
+            ->findById(
+                $prescription["appointment_id"]
+            );
 
+        $doctor =
+            $this->doctorModel
+            ->findByUserId(
+                Auth::id()
+            );
+
+        if (
+            !$doctor ||
+            (int)$appointment["doctor_id"]
+            !==
+            (int)$doctor["id"]
+        ) {
+            die("403 - Access Denied");
+        }
         if (!$prescription) {
             $_SESSION["flash_error"] = "Prescription not found";
             redirect("index.php?page=appointments&action=schedule");
         }
-        
+
 
         require_once __DIR__ . "/../views/prescriptions/edit.php";
     }
@@ -177,6 +208,27 @@ class PrescriptionController
         $prescription =
             $this->prescriptionModel
             ->findById($id);
+
+        $appointment =
+            $this->appointmentModel
+            ->findById(
+                $prescription["appointment_id"]
+            );
+
+        $doctor =
+            $this->doctorModel
+            ->findByUserId(
+                Auth::id()
+            );
+
+        if (
+            !$doctor ||
+            (int)$appointment["doctor_id"]
+            !==
+            (int)$doctor["id"]
+        ) {
+            die("403 - Access Denied");
+        }
 
         if (!$prescription) {
 
@@ -362,7 +414,8 @@ class PrescriptionController
                 "PDF file not found";
 
             redirect(
-                "javascript:history.back()"
+                "index.php?page=prescriptions&action=view&id="
+                    . $prescriptionId
             );
         }
 
@@ -377,7 +430,8 @@ class PrescriptionController
                 "File missing from server";
 
             redirect(
-                "javascript:history.back()"
+                "index.php?page=prescriptions&action=view&id="
+                    . $prescriptionId
             );
         }
 

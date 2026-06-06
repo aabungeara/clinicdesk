@@ -4,12 +4,10 @@ Auth::requireRole("doctor");
 
 $pageTitle = "Doctor Dashboard";
 
-// تضمين المكونات العلوية الموحدة للمشروع (الـ Navbar الافتراضي والسايدبار المشترك)
 require_once __DIR__ . "/../partials/header.php";
 require_once __DIR__ . "/../partials/navbar.php";
 require_once __DIR__ . "/../partials/sidebar.php";
 
-// تهيئة المتغيرات لضمان أمان الكود واستقراره
 $todayAppointments = $todayAppointments ?? [];
 $monthStats = $monthStats ?? [];
 
@@ -71,7 +69,6 @@ $monthStats = $monthStats ?? [];
             <h5 class="mt-4 mb-2 font-weight-bold text-secondary">Today's Appointments By Status</h5>
             <div class="row">
                 <?php 
-                // توزيع دقيق للحالات الأربعة لليوم الحالي
                 $todayStatuses = [
                     'pending'   => ['total' => 0, 'bg' => 'bg-warning', 'icon' => 'fas fa-clock'],
                     'confirmed' => ['total' => 0, 'bg' => 'bg-info',    'icon' => 'fas fa-check-circle'],
@@ -79,7 +76,6 @@ $monthStats = $monthStats ?? [];
                     'cancelled' => ['total' => 0, 'bg' => 'bg-danger',  'icon' => 'fas fa-times-circle']
                 ];
 
-                // حساب الأعداد الفعلية لمواعيد اليوم بناءً على المصفوفة الممررة
                 if (!empty($todayAppointments)) {
                     foreach ($todayAppointments as $app) {
                         $statusName = strtolower($app['status']);
@@ -133,7 +129,7 @@ $monthStats = $monthStats ?? [];
                                             </td>
                                             <td>
                                                 <?php 
-                                                    // مصفوفة لتحديد لون الـ Badge بشكل ديناميكي ونظيف
+                                                    
                                                     $badgeColors = [
                                                         'completed' => 'success',
                                                         'pending'   => 'warning',
@@ -173,6 +169,5 @@ $monthStats = $monthStats ?? [];
 </div>
 
 <?php
-// تضمين الفوتر المشترك للمشروع
 require_once __DIR__ . "/../partials/footer.php";
 ?>

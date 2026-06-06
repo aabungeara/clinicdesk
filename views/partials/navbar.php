@@ -11,7 +11,6 @@
     <ul class="navbar-nav ml-auto">
 
         <?php if (Auth::check()): 
-            // جلب اسم المستخدم الحالي ودوره ديناميكياً
             $currentUser = Auth::currentUser();
             $userName = isset($currentUser['name']) ? $currentUser['name'] : 'User';
             $userRole = isset($_SESSION['user_role']) ? ucfirst($_SESSION['user_role']) : 'Staff';
@@ -62,7 +61,6 @@
 </nav>
 
 <style>
-/* تفعيل حركات انسيابية ناعمة لظهور القائمة المنسدلة */
 .user-menu .dropdown-menu {
     transform-origin: top right;
 }
@@ -73,7 +71,6 @@
     from { opacity: 0; transform: scale(0.95) translateY(-8px); }
     to { opacity: 1; transform: scale(1) translateY(0); }
 }
-/* تنسيق إضافي لوسم الرأس متوافق مع كلاسات AdminLTE */
 .user-header {
     text-align: center;
 }
