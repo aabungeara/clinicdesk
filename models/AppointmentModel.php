@@ -158,7 +158,8 @@ class AppointmentModel extends BaseModel
             SELECT
                 a.*,
                 du.name AS doctor_name,
-                s.name AS specialization_name
+                s.name AS specialization_name,
+                IF(pr.id IS NOT NULL, 1, 0) AS has_prescription
             FROM appointments a
 
             JOIN doctors d
@@ -169,6 +170,8 @@ class AppointmentModel extends BaseModel
 
             JOIN specializations s
                 ON d.specialization_id = s.id
+                LEFT JOIN prescriptions pr 
+                ON a.id = pr.appointment_id
 
             $where
 
@@ -237,13 +240,18 @@ class AppointmentModel extends BaseModel
             $this->execute(
                 "
             SELECT
-                a.*,
-                p.name AS patient_name
+            a.*,
+            p.name AS patient_name,
+            pr.id AS prescription_id
+
             FROM appointments a
 
             JOIN users p
-                ON a.patient_id = p.id
+            ON a.patient_id = p.id
 
+            LEFT JOIN prescriptions pr
+            ON pr.appointment_id = a.id
+            
             $where
 
             ORDER BY
@@ -581,19 +589,22 @@ class AppointmentModel extends BaseModel
         int $doctorId
     ): array {
 
-        $today =
-            date("Y-m-d");
+        $today = date("Y-m-d");
 
-        $result =
-            $this->execute(
-                "
+        $result = $this->execute(
+            "
             SELECT
                 a.*,
-                u.name AS patient_name
+                u.name AS patient_name,
+                pr.id AS prescription_id 
             FROM appointments a
 
             JOIN users u
                 ON a.patient_id=u.id
+
+            
+            LEFT JOIN prescriptions pr 
+                ON a.id = pr.appointment_id
 
             WHERE
                 a.doctor_id=?
@@ -603,42 +614,45 @@ class AppointmentModel extends BaseModel
             ORDER BY
                 a.appt_time ASC
             ",
-                "is",
-                [
-                    $doctorId,
-                    $today
-                ]
-            );
+            "is",
+            [
+                $doctorId,
+                $today
+            ]
+        );
 
-        return
-            $result->fetch_all(
-                MYSQLI_ASSOC
-            );
+        return $result->fetch_all(
+            MYSQLI_ASSOC
+        );
     }
 
     public function getTodayByDoctor(
         int $doctorId
     ): array {
 
-        $result =
-            $this->execute(
-                "
+        $result = $this->execute(
+            "
             SELECT
                 a.*,
-                u.name AS patient_name
+                u.name AS patient_name,
+                pr.id AS prescription_id 
             FROM appointments a
 
             JOIN users u
                 ON a.patient_id=u.id
+
+            
+            LEFT JOIN prescriptions pr 
+                ON a.id = pr.appointment_id
 
             WHERE a.doctor_id=?
             AND a.appt_date=CURDATE()
 
             ORDER BY a.appt_time
             ",
-                "i",
-                [$doctorId]
-            );
+            "i",
+            [$doctorId]
+        );
 
         return $result->fetch_all(
             MYSQLI_ASSOC

@@ -1,9 +1,324 @@
 <?php
 
+// require_once __DIR__ . "/../core/Auth.php";
+// require_once __DIR__ . "/../core/helpers.php";
+// require_once __DIR__ . "/../core/CSRF.php";
+// require_once __DIR__ . "/../models/PrescriptionModel.php";
+// require_once __DIR__ . "/../models/AppointmentModel.php";
+
+// class PrescriptionController
+// {
+//     private PrescriptionModel $prescriptionModel;
+//     private AppointmentModel $appointmentModel;
+
+//     public function __construct()
+//     {
+//         $this->prescriptionModel = new PrescriptionModel();
+//         $this->appointmentModel = new AppointmentModel();
+//     }
+
+//     public function index(): void
+//     {
+//         Auth::requireRole(
+//             "doctor"
+//         );
+
+//         require_once __DIR__
+//             . "/../views/prescriptions/index.php";
+//     }
+
+//     public function view(): void
+//     {
+
+//         Auth::requireRole(
+//             "patient",
+//             "doctor",
+//             "admin"
+//         );
+
+//         $id =
+//             (int)($_GET["id"] ?? 0);
+
+
+
+//         $prescription =
+//             $this->prescriptionModel
+//             ->findByAppointmentId($id);
+
+
+//         if (!$prescription) {
+
+//             $_SESSION["flash"] =
+//                 "Prescription not found";
+
+//             redirect(
+//                 "index.php?page=appointments&action=schedule"
+//             );
+//         }
+
+//         $appointment = $this->appointmentModel->findById((int)$prescription['appointment_id']);
+
+//         $currentUserId = Auth::id();
+//         $currentRole   = Auth::role();
+
+//         if ($currentRole === 'patient') {
+
+//             if (isset($prescription['patient_id']) && $prescription['patient_id'] != $currentUserId) {
+//                 die("403 - Access Denied: You do not own this prescription.");
+//             }
+//         } elseif ($currentRole === 'doctor') {
+
+//             if (isset($prescription['doctor_user_id']) && $prescription['doctor_user_id'] != $currentUserId) {
+//                 die("403 - Access Denied: You are not the doctor for this prescription.");
+//             }
+//         }
+
+
+//         require_once __DIR__
+//             . "/../views/prescriptions/view.php";
+//     }
+
+//     public function myPrescriptions(): void
+//     {
+//         Auth::requireRole(
+//             "patient"
+//         );
+
+//         $prescriptions =
+//             $this->prescriptionModel
+//             ->getByPatient(
+//                 Auth::id()
+//             );
+
+//         require_once __DIR__
+//             . "/../views/prescriptions/index.php";
+//     }
+
+//     public function create(): void
+//     {
+//         Auth::requireRole("doctor");
+
+//         $appointmentId =
+//             (int)($_GET["appointment_id"] ?? 0);
+
+
+//         $appointment =
+//             $this->appointmentModel
+//             ->findById(
+//                 $appointmentId
+//             );
+
+//         if (
+//             !$appointment ||
+//             $appointment["status"] !== "completed"
+//         ) {
+
+//             $_SESSION["flash_error"] =
+//                 "Appointment not completed";
+
+//             redirect(
+//                 "index.php?page=appointments&action=schedule"
+//             );
+//         }
+
+//         $existing =
+//             $this->prescriptionModel
+//             ->findByAppointmentId(
+//                 $appointmentId
+//             );
+
+//         if ($existing) {
+
+//             $_SESSION["flash_error"] =
+//                 "Prescription already exists";
+
+//             redirect(
+//                 "index.php?page=appointments&action=schedule"
+//             );
+//         }
+
+//         require_once __DIR__
+//             . "/../views/prescriptions/create.php";
+//     }
+
+//     public function store(): void
+//     {
+//         Auth::requireRole("doctor");
+
+//         if (
+//             !CSRF::validateToken(
+//                 $_POST["csrf_token"] ?? ""
+//             )
+//         ) {
+
+//             die("Invalid CSRF");
+//         }
+
+//         $filePath = null;
+
+//         if (
+//             isset($_FILES["prescription_file"])
+//             &&
+//             $_FILES["prescription_file"]["error"] === 0
+//         ) {
+
+//             if (
+//                 $_FILES["prescription_file"]["size"]
+//                 > 3 * 1024 * 1024
+//             ) {
+
+//                 $_SESSION["flash_error"] =
+//                     "PDF must be less than 3MB";
+
+//                 redirect(
+//                     "index.php?page=prescriptions&action=create&appointment_id="
+//                         . $_POST["appointment_id"]
+//                 );
+//             }
+
+//             $finfo =
+//                 finfo_open(
+//                     FILEINFO_MIME_TYPE
+//                 );
+
+//             $mime =
+//                 finfo_file(
+//                     $finfo,
+//                     $_FILES["prescription_file"]["tmp_name"]
+//                 );
+
+//             finfo_close($finfo);
+
+//             if (
+//                 $mime !== "application/pdf"
+//             ) {
+
+//                 $_SESSION["flash_error"] =
+//                     "Only PDF files are allowed";
+
+//                 redirect(
+//                     "index.php?page=prescriptions&action=create&appointment_id="
+//                         . $_POST["appointment_id"]
+//                 );
+//             }
+
+//             $fileName =
+//                 "prescription_"
+//                 . $_POST["appointment_id"]
+//                 . "_"
+//                 . time()
+//                 . ".pdf";
+
+//             $uploadDir =
+//                 __DIR__
+//                 . "/../public/uploads/prescriptions/";
+
+//             move_uploaded_file(
+//                 $_FILES["prescription_file"]["tmp_name"],
+//                 $uploadDir . $fileName
+//             );
+
+//             $filePath =
+//                 "uploads/prescriptions/"
+//                 . $fileName;
+//         }
+
+//         $data = [
+
+//             "appointment_id" =>
+//             (int)$_POST["appointment_id"],
+
+//             "diagnosis" =>
+//             trim($_POST["diagnosis"]),
+
+//             "medications" =>
+//             trim($_POST["medications"]),
+
+//             "notes" =>
+//             trim($_POST["notes"]),
+
+//             "file_path" => $filePath
+//         ];
+
+//         $this->prescriptionModel
+//             ->create($data);
+
+//         $_SESSION["flash_success"] =
+//             "Prescription created";
+
+//         redirect(
+//             "index.php?page=appointments&action=schedule"
+//         );
+//     }
+
+//     public function edit(): void
+//     {
+//         Auth::requireRole("doctor");
+
+//         // $appointmentId =
+//         //     (int)($_GET["appointment_id"] ?? 0);
+
+//         // $prescription =
+//         //     $this->prescriptionModel
+//         //     ->findByAppointmentId($appointmentId);
+
+//         $id = (int)($_GET["id"] ?? 0);
+
+//         $prescription = $this->prescriptionModel->findById($id);
+
+//         if (!$prescription) {
+
+//             $_SESSION["flash_error"] =
+//                 "Prescription not found";
+
+//             redirect(
+//                 "index.php?page=appointments&action=schedule"
+//             );
+//         }
+
+//         require_once __DIR__
+//             . "/../views/prescriptions/edit.php";
+//     }
+
+//     public function update(): void
+//     {
+//         Auth::requireRole("doctor");
+
+//         $id =
+//             (int)$_POST["id"];
+
+//         $this->prescriptionModel
+//             ->update(
+//                 $id,
+//                 [
+//                     "diagnosis" =>
+//                     trim($_POST["diagnosis"]),
+
+//                     "medications" =>
+//                     trim($_POST["medications"]),
+
+//                     "notes" =>
+//                     trim($_POST["notes"]),
+
+//                     "file_path"   => $_POST["existing_file_path"] ?? null
+//                 ]
+//             );
+
+//         $_SESSION["flash_success"] =
+//             "Prescription updated";
+
+//         redirect(
+//             "index.php?page=appointments&action=schedule"
+//         );
+//     }
+// }
+
+
 require_once __DIR__ . "/../core/Auth.php";
 require_once __DIR__ . "/../core/helpers.php";
+require_once __DIR__ . "/../core/CSRF.php";
 require_once __DIR__ . "/../models/PrescriptionModel.php";
-require_once __DIR__. "/../models/AppointmentModel.php";
+require_once __DIR__ . "/../models/AppointmentModel.php";
 
 class PrescriptionController
 {
@@ -12,134 +327,163 @@ class PrescriptionController
 
     public function __construct()
     {
-        $this->prescriptionModel =
-            new PrescriptionModel();
-        $this->appointmentModel =
-            new AppointmentModel();
+        $this->prescriptionModel = new PrescriptionModel();
+        $this->appointmentModel = new AppointmentModel();
     }
 
     public function index(): void
     {
-        Auth::requireRole(
-            "doctor"
-        );
-
-        require_once __DIR__
-            . "/../views/prescriptions/index.php";
+        Auth::requireRole("doctor");
+        require_once __DIR__ . "/../views/prescriptions/index.php";
     }
 
-    public function view(): void
-    {
-        Auth::requireRole(
-            "patient",
-            "doctor",
-            "admin"
-        );
-
-        $appointmentId =
-            (int)($_GET["appointment_id"] ?? 0);
-
-        $prescription =
-            $this->prescriptionModel
-            ->findByAppointmentId(
-                $appointmentId
-            );
-
-        if (!$prescription) {
-
-            $_SESSION["flash"] =
-                "Prescription not found";
-
-            redirect(
-                "index.php?page=appointments"
-            );
-        }
-
-        require_once __DIR__
-            . "/../views/prescriptions/view.php";
-    }
-
-    public function myPrescriptions(): void
-    {
-        Auth::requireRole(
-            "patient"
-        );
-
-        require_once __DIR__
-            . "/../views/prescriptions/index.php";
-    }
-
-    public function create(): void
+   public function view(): void
 {
-    Auth::requireRole("doctor");
+    Auth::requireRole(
+        "patient",
+        "doctor",
+        "admin"
+    );
 
-    $appointmentId =
-        (int)($_GET["appointment_id"] ?? 0);
+    $prescriptionId =
+        (int)($_GET["id"] ?? 0);
 
-    $appointmentModel =
-        new AppointmentModel();
+    $prescription =
+        $this->prescriptionModel
+        ->findById($prescriptionId);
 
-    $appointment =
-        $appointmentModel
-        ->findById(
-            $appointmentId
-        );
-
-    if (
-        !$appointment ||
-        $appointment["status"] !== "completed"
-    ) {
+    if (!$prescription) {
 
         $_SESSION["flash_error"] =
-            "Appointment not completed";
+            "Prescription not found";
 
         redirect(
-            "index.php?page=appointments"
+            "index.php?page=appointments&action=schedule"
         );
+    }
+
+    $appointment =
+        $this->appointmentModel
+        ->findById(
+            $prescription["appointment_id"]
+        );
+
+    if (!$appointment) {
+
+        die("Appointment not found");
     }
 
     require_once __DIR__
-        . "/../views/prescriptions/create.php";
+        . "/../views/prescriptions/view.php";
 }
 
-public function store(): void
-{
-    Auth::requireRole("doctor");
+    public function myPrescriptions(): void
+    {
+        Auth::requireRole("patient");
 
-    if (
-        !CSRF::validateToken(
-            $_POST["csrf_token"] ?? ""
-        )
-    ) {
+        $prescriptions = $this->prescriptionModel->getByPatient(Auth::id());
 
-        die("Invalid CSRF");
+        require_once __DIR__ . "/../views/prescriptions/index.php";
     }
 
-    $data = [
+    public function create(): void
+    {
+        Auth::requireRole("doctor");
 
-        "appointment_id" =>
-            (int)$_POST["appointment_id"],
+        $appointmentId = (int)($_GET["appointment_id"] ?? 0);
 
-        "diagnosis" =>
-            trim($_POST["diagnosis"]),
+        $appointment = $this->appointmentModel->findById($appointmentId);
 
-        "medications" =>
-            trim($_POST["medications"]),
+        if (!$appointment || $appointment["status"] !== "completed") {
+            $_SESSION["flash_error"] = "Appointment not completed";
+            redirect("index.php?page=appointments&action=schedule");
+        }
 
-        "notes" =>
-            trim($_POST["notes"]),
+        $existing = $this->prescriptionModel->findByAppointmentId($appointmentId);
 
-        "file_path" => null
-    ];
+        if ($existing) {
+            $_SESSION["flash_error"] = "Prescription already exists";
+            redirect("index.php?page=appointments&action=schedule");
+        }
 
-    $this->prescriptionModel
-        ->create($data);
+        require_once __DIR__ . "/../views/prescriptions/create.php";
+    }
 
-    $_SESSION["flash_success"] =
-        "Prescription created";
+    public function store(): void
+    {
+        Auth::requireRole("doctor");
 
-    redirect(
-        "index.php?page=appointments"
-    );
-}
+        if (!CSRF::validateToken($_POST["csrf_token"] ?? "")) {
+            die("Invalid CSRF");
+        }
+
+        $filePath = null;
+
+        if (isset($_FILES["prescription_file"]) && $_FILES["prescription_file"]["error"] === 0) {
+            if ($_FILES["prescription_file"]["size"] > 3 * 1024 * 1024) {
+                $_SESSION["flash_error"] = "PDF must be less than 3MB";
+                redirect("index.php?page=prescriptions&action=create&appointment_id=" . $_POST["appointment_id"]);
+            }
+
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mime = finfo_file($finfo, $_FILES["prescription_file"]["tmp_name"]);
+            finfo_close($finfo);
+
+            if ($mime !== "application/pdf") {
+                $_SESSION["flash_error"] = "Only PDF files are allowed";
+                redirect("index.php?page=prescriptions&action=create&appointment_id=" . $_POST["appointment_id"]);
+            }
+
+            $fileName = "prescription_" . $_POST["appointment_id"] . "_" . time() . ".pdf";
+            $uploadDir = __DIR__ . "/../public/uploads/prescriptions/";
+
+            move_uploaded_file($_FILES["prescription_file"]["tmp_name"], $uploadDir . $fileName);
+            $filePath = "uploads/prescriptions/" . $fileName;
+        }
+
+        $data = [
+            "appointment_id" => (int)$_POST["appointment_id"],
+            "diagnosis" => trim($_POST["diagnosis"]),
+            "medications" => trim($_POST["medications"]),
+            "notes" => trim($_POST["notes"]),
+            "file_path" => $filePath
+        ];
+
+        $this->prescriptionModel->create($data);
+
+        $_SESSION["flash_success"] = "Prescription created";
+        redirect("index.php?page=appointments&action=schedule");
+    }
+
+    public function edit(): void
+    {
+        Auth::requireRole("doctor");
+
+        $id = (int)($_GET["id"] ?? 0);
+        $prescription = $this->prescriptionModel->findById($id);
+
+        if (!$prescription) {
+            $_SESSION["flash_error"] = "Prescription not found";
+            redirect("index.php?page=appointments&action=schedule");
+        }
+
+        require_once __DIR__ . "/../views/prescriptions/edit.php";
+    }
+
+    public function update(): void
+    {
+        Auth::requireRole("doctor");
+
+        $id = (int)$_POST["id"];
+
+        $this->prescriptionModel->update($id, [
+            "diagnosis" => trim($_POST["diagnosis"]),
+            "medications" => trim($_POST["medications"]),
+            "notes" => trim($_POST["notes"]),
+            "file_path"   => $_POST["existing_file_path"] ?? null
+        ]);
+
+        $_SESSION["flash_success"] = "Prescription updated";
+        redirect("index.php?page=appointments&action=schedule");
+    }
 }

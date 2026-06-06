@@ -233,7 +233,7 @@ require_once __DIR__ . "/../partials/sidebar.php";
                                     <?php if (
                                         $appointment["status"] === "completed"
                                         &&
-                                        $appointment["has_prescription"]
+                                        $appointment["has_prescription"?? false]
                                     ): ?>
 
                                         <a

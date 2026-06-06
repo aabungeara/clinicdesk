@@ -106,14 +106,31 @@ function getStatusBadge($status)
                                                 <i class="fas fa-check-double mr-1"></i> Complete
                                             </a>
                                         <?php endif; ?>
-                                        <?php if ($appointment["status"] === "completed"): ?>
+                                        <?php if (
+                                            $appointment["status"] === "completed"
+                                            &&
+                                            empty($appointment["prescription_id"])
+                                        ): ?>
 
                                             <a
                                                 href="index.php?page=prescriptions&action=create&appointment_id=<?= $appointment["id"] ?>"
-                                                class="btn btn-success btn-sm btn-block mb-1">
+                                                class="btn btn-success btn-sm">
 
-                                                <i class="fas fa-file-medical mr-1"></i>
                                                 Add Prescription
+
+                                            </a>
+
+                                        <?php endif; ?>
+
+                                        <?php if (
+                                            !empty($appointment["prescription_id"])
+                                        ): ?>
+                                                
+                                            <a
+                                                href="index.php?page=prescriptions&action=view&id=<?= $appointment["prescription_id"] ?>"
+                                                class="btn btn-info btn-sm">
+
+                                                View Prescription
 
                                             </a>
 

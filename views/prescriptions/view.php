@@ -116,7 +116,7 @@ require_once __DIR__ . "/../partials/sidebar.php";
                             </h5>
 
                             <a
-                                href="index.php?page=prescriptions&action=download&id=<?= $prescription["appointment_id"] ?>"
+                                href="index.php?page=prescriptions&action=download&id=<?= $prescription["id"] ?>"
                                 class="btn btn-danger">
 
                                 <i class="fas fa-file-pdf"></i>
