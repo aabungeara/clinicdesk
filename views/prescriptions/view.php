@@ -6,6 +6,11 @@ require_once __DIR__ . "/../partials/header.php";
 require_once __DIR__ . "/../partials/navbar.php";
 require_once __DIR__ . "/../partials/sidebar.php";
 
+$prescription = $prescription ?? $data["prescription"] ?? [];
+
+$diagnosis   = $prescription["diagnosis"] ?? "";
+$medications = $prescription["medications"] ?? "";
+$notes       = $prescription["notes"] ?? "";
 ?>
 
 <div class="content-wrapper">
