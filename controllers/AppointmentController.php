@@ -193,28 +193,95 @@ class AppointmentController
 
     public function cancel(): void
     {
-        Auth::requireRole("patient");
-
-        if (
-            !CSRF::validateToken(
-                $_POST["csrf_token"] ?? ""
-            )
-        ) {
-            die("Invalid CSRF Token");
+        if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+            die("Method Not Allowed");
         }
 
-        $id =
-            (int)($_POST["id"] ?? 0);
+        if (!CSRF::validateToken($_POST["csrf_token"] ?? "")) {
+            $_SESSION["flash"] = "Invalid CSRF Token";
+            redirect("index.php?page=dashboard");
+            return;
+        }
 
-        $this->appointmentModel
-            ->cancel($id);
+        $id = (int)($_POST["id"] ?? 0);
+        $appointment = $this->appointmentModel->findById($id);
 
-        $_SESSION["flash"] =
-            "Appointment cancelled";
+        if (!$appointment) {
+            $_SESSION["flash"] = "Appointment not found";
+            redirect("index.php?page=dashboard");
+            return;
+        }
 
-        redirect(
-            "index.php?page=appointments&action=myAppointments"
-        );
+        $role = Auth::role();
+        $userId = Auth::id();
+
+       
+        if ($role === "patient") {
+            if ((int)$appointment["patient_id"] !== $userId) {
+                die("403 - Unauthorized Action");
+            }
+            if ($appointment["status"] !== "pending") {
+                $_SESSION["flash"] = "You can only cancel pending appointments";
+                redirect("index.php?page=appointments&action=myAppointments");
+                return;
+            }
+            
+            $this->appointmentModel->cancel($id);
+            $_SESSION["flash"] = "Appointment cancelled successfully";
+            redirect("index.php?page=appointments&action=myAppointments");
+            return;
+        }
+
+        
+        if ($role === "doctor") {
+            $doctor = $this->doctorModel->findByUserId($userId);
+            if (!$doctor || (int)$appointment["doctor_id"] !== (int)$doctor["id"]) {
+                die("403 - Unauthorized Action");
+            }
+
+            $this->appointmentModel->cancel($id);
+            $_SESSION["flash"] = "Appointment cancelled by doctor";
+            redirect("index.php?page=appointments&action=schedule");
+            return;
+        }
+
+        
+        if ($role === "admin") {
+            $this->appointmentModel->cancel($id);
+            $_SESSION["flash"] = "Appointment cancelled by admin";
+            redirect("index.php?page=appointments&action=all");
+            return;
+        }
+    }
+
+    public function saveNotes(): void
+    {
+        Auth::requireRole("doctor");
+
+        if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+            die("Method Not Allowed");
+        }
+
+        if (!CSRF::validateToken($_POST["csrf_token"] ?? "")) {
+            $_SESSION["flash"] = "Invalid CSRF Token";
+            redirect("index.php?page=appointments&action=schedule");
+            return;
+        }
+
+        $id = (int)($_POST["id"] ?? 0);
+        $notes = trim($_POST["doctor_notes"] ?? "");
+
+        $appointment = $this->appointmentModel->findById($id);
+        $doctor = $this->doctorModel->findByUserId(Auth::id());
+
+        if (!$appointment || !$doctor || (int)$appointment["doctor_id"] !== (int)$doctor["id"]) {
+            die("403 - Unauthorized Action");
+        }
+
+        $this->appointmentModel->updateStatus($id, $appointment["status"], $notes);
+
+        $_SESSION["flash"] = "Doctor notes saved successfully";
+        redirect("index.php?page=appointments&action=view&id=" . $id);
     }
     public function schedule(): void
     {

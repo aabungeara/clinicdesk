@@ -1,70 +1,61 @@
 <?php
 
-$pageTitle="Login";
+$pageTitle = "Login";
 
-require_once __DIR__
-."/../partials/header.php";
+// تضمين الهيدر الذي يحتوي على ملفات CSS الخاصة بـ AdminLTE وبوتستراب
+require_once __DIR__ . "/../partials/header.php";
 ?>
 
-<div class="login-box mx-auto">
+<div class="login-page d-flex align-items-center justify-content-center bg-light" style="min-height: 100vh;">
+    
+    <div class="login-box">
+        <div class="login-logo font-weight-bold mb-3 text-center">
+            <a href="#" class="text-dark"><b>Clinic</b>Desk</a>
+        </div>
 
-<div class="card">
+        <div class="card card-outline card-primary shadow-lg">
+            <div class="card-body login-card-body rounded">
+                <p class="login-box-msg text-muted">Sign in to start your session</p>
 
-<div class="card-body">
+                <form method="POST" action="index.php?page=auth&action=login">
 
-<h3 class="text-center mb-4">
-ClinicDesk
-</h3>
+                    <input type="hidden" name="csrf_token" value="<?= CSRF::generateToken() ?>">
 
-<form method="POST"
-action="index.php?page=auth&action=login">
+                    <div class="input-group mb-3">
+                        <input type="email" name="email" class="form-control" placeholder="Email" required>
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-envelope text-muted"></span>
+                            </div>
+                        </div>
+                    </div>
 
-<input
-type="hidden"
-name="csrf_token"
-value="<?= CSRF::generateToken() ?>"
->
+                    <div class="input-group mb-4">
+                        <input type="password" name="password" class="form-control" placeholder="Password" required>
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-lock text-muted"></span>
+                            </div>
+                        </div>
+                    </div>
 
-<div class="input-group mb-3">
+                    <div class="row">
+                        <div class="col-12">
+                            <button class="btn btn-primary btn-block font-weight-bold py-2 shadow-sm" type="submit">
+                                <i class="fas fa-sign-in-alt mr-1"></i> Login
+                            </button>
+                        </div>
+                    </div>
 
-<input
-type="email"
-name="email"
-class="form-control"
-placeholder="Email"
-required
->
-
-</div>
-
-<div class="input-group mb-3">
-
-<input
-type="password"
-name="password"
-class="form-control"
-placeholder="Password"
-required
->
-
-</div>
-
-<button
-class="btn btn-primary btn-block"
-type="submit"
->
-Login
-</button>
-
-</form>
-
-</div>
-
-</div>
+                </form>
+            </div>
+        </div>
+    </div>
 
 </div>
 
 <?php
-require_once __DIR__
-."/../partials/footer.php";
+// في صفحات الـ Login المستقلة يفضل إغلاق تاجات الجسم هكذا إذا لم يكن هناك فوتر مخصص
 ?>
+</body>
+</html>

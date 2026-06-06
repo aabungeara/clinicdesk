@@ -688,4 +688,116 @@ class AppointmentModel extends BaseModel
             [$id]
         );
     }
+
+    public function verifyOwnership(int $appointmentId, int $patientId): bool
+    {
+        $result = $this->execute(
+            "SELECT id FROM appointments WHERE id = ? AND patient_id = ?",
+            "ii",
+            [$appointmentId, $patientId]
+        );
+        return $result && $result->num_rows > 0;
+    }
+
+    public function getUsersCountByRole(): array
+    {
+        $query = $this->execute("SELECT role, COUNT(*) as total FROM users GROUP BY role");
+        return $query ? $query->fetch_all(MYSQLI_ASSOC) : [];
+    }
+
+    public function getTodayAppointmentsCount(): int
+    {
+        $query = $this->execute("SELECT COUNT(*) as total FROM appointments WHERE appt_date = CURDATE()");
+        return $query ? (int)$query->fetch_assoc()["total"] : 0;
+    }
+
+    public function getWeekStatsByStatus(): array
+    {
+        $query = $this->execute("SELECT status, COUNT(*) as total FROM appointments WHERE WEEK(appt_date) = WEEK(NOW()) AND YEAR(appt_date) = YEAR(NOW()) GROUP BY status");
+        return $query ? $query->fetch_all(MYSQLI_ASSOC) : [];
+    }
+
+    public function getRecentAppointments(int $limit = 5): array
+    {
+        $query = $this->execute("
+        SELECT a.*, p.name AS patient_name, du.name AS doctor_name 
+        FROM appointments a
+        JOIN users p ON a.patient_id = p.id
+        JOIN doctors d ON a.doctor_id = d.id
+        JOIN users du ON d.user_id = du.id
+        ORDER BY a.id DESC LIMIT ?
+    ", "i", [$limit]);
+        return $query ? $query->fetch_all(MYSQLI_ASSOC) : [];
+    }
+
+
+    public function getDoctorIdByUserId(int $userId): int
+    {
+        $query = $this->execute("SELECT id FROM doctors WHERE user_id = ?", "i", [$userId]);
+        $doctor = $query ? $query->fetch_assoc() : null;
+        return $doctor ? (int)$doctor["id"] : 0;
+    }
+
+    public function getDoctorMonthStats(int $doctorId): array
+    {
+        $query = $this->execute("
+        SELECT 
+            COUNT(*) as total,
+            SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
+            SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed
+        FROM appointments 
+        WHERE doctor_id = ? AND MONTH(appt_date) = MONTH(CURDATE()) AND YEAR(appt_date) = YEAR(CURDATE())
+    ", "i", [$doctorId]);
+        return $query ? $query->fetch_assoc() : ["total" => 0, "pending" => 0, "completed" => 0];
+    }
+
+    public function getUpcomingAppointmentsByDoctor(int $doctorId, int $limit = 5): array
+    {
+        $query = $this->execute("
+        SELECT a.*, p.name AS patient_name 
+        FROM appointments a
+        JOIN users p ON a.patient_id = p.id
+        WHERE a.doctor_id = ? AND (a.appt_date > CURDATE() OR (a.appt_date = CURDATE() AND a.appt_time >= CURTIME()))
+        AND a.status IN ('pending', 'confirmed')
+        ORDER BY a.appt_date ASC, a.appt_time ASC LIMIT ?
+    ", "ii", [$doctorId, $limit]);
+        return $query ? $query->fetch_all(MYSQLI_ASSOC) : [];
+    }
+
+    public function getActiveAppointmentsByPatient(int $patientId): array
+    {
+        $query = $this->execute("
+        SELECT a.*, du.name AS doctor_name 
+        FROM appointments a
+        JOIN doctors d ON a.doctor_id = d.id
+        JOIN users du ON d.user_id = du.id
+        WHERE a.patient_id = ? AND a.status IN ('pending', 'confirmed')
+        ORDER BY a.appt_date ASC, a.appt_time ASC
+    ", "i", [$patientId]);
+        return $query ? $query->fetch_all(MYSQLI_ASSOC) : [];
+    }
+
+    public function getCompletedCountByPatient(int $patientId): int
+    {
+        $query = $this->execute("SELECT COUNT(*) as total FROM appointments WHERE patient_id = ? AND status = 'completed'", "i", [$patientId]);
+        if ($query) {
+            $row = $query->fetch_assoc();
+            return (int)($row['total'] ?? 0);
+        }
+        return 0;
+    }
+
+    public function getPrescriptionsCountByPatient(int $patientId): int
+    {
+        $query = $this->execute("
+        SELECT COUNT(*) as total FROM prescriptions pr
+        JOIN appointments a ON pr.appointment_id = a.id
+        WHERE a.patient_id = ?
+    ", "i", [$patientId]);
+        if ($query) {
+            $row = $query->fetch_assoc();
+            return (int)($row['total'] ?? 0);
+        }
+        return 0;
+    }
 }
