@@ -466,24 +466,128 @@ class PrescriptionController
             $_SESSION["flash_error"] = "Prescription not found";
             redirect("index.php?page=appointments&action=schedule");
         }
+        var_dump($prescription);
+die();
 
         require_once __DIR__ . "/../views/prescriptions/edit.php";
     }
 
     public function update(): void
-    {
-        Auth::requireRole("doctor");
+{
+    Auth::requireRole("doctor");
 
-        $id = (int)$_POST["id"];
-
-        $this->prescriptionModel->update($id, [
-            "diagnosis" => trim($_POST["diagnosis"]),
-            "medications" => trim($_POST["medications"]),
-            "notes" => trim($_POST["notes"]),
-            "file_path"   => $_POST["existing_file_path"] ?? null
-        ]);
-
-        $_SESSION["flash_success"] = "Prescription updated";
-        redirect("index.php?page=appointments&action=schedule");
+    if (
+        !CSRF::validateToken(
+            $_POST["csrf_token"] ?? ""
+        )
+    ) {
+        die("Invalid CSRF");
     }
+
+    $id =
+        (int)$_POST["id"];
+
+    $prescription =
+        $this->prescriptionModel
+        ->findById($id);
+
+    if (!$prescription) {
+
+        redirect(
+            "index.php?page=appointments&action=schedule"
+        );
+    }
+
+    $filePath =
+        $prescription["file_path"];
+
+    if (
+        isset($_FILES["prescription_file"])
+        &&
+        $_FILES["prescription_file"]["error"] === 0
+    ) {
+
+        $finfo =
+            finfo_open(
+                FILEINFO_MIME_TYPE
+            );
+
+        $mime =
+            finfo_file(
+                $finfo,
+                $_FILES["prescription_file"]["tmp_name"]
+            );
+
+        finfo_close($finfo);
+
+        if (
+            $mime !==
+            "application/pdf"
+        ) {
+
+            die(
+                "Only PDF files allowed"
+            );
+        }
+
+        if (
+            !empty($filePath)
+            &&
+            file_exists(
+                __DIR__
+                . "/../public/"
+                . $filePath
+            )
+        ) {
+
+            unlink(
+                __DIR__
+                . "/../public/"
+                . $filePath
+            );
+        }
+
+        $fileName =
+            "prescription_"
+            . time()
+            . ".pdf";
+
+        move_uploaded_file(
+            $_FILES["prescription_file"]["tmp_name"],
+            __DIR__
+            . "/../public/uploads/prescriptions/"
+            . $fileName
+        );
+
+        $filePath =
+            "uploads/prescriptions/"
+            . $fileName;
+    }
+
+    $this->prescriptionModel
+        ->update(
+            $id,
+            [
+                "diagnosis" =>
+                    trim($_POST["diagnosis"]),
+
+                "medications" =>
+                    trim($_POST["medications"]),
+
+                "notes" =>
+                    trim($_POST["notes"]),
+
+                "file_path" =>
+                    $filePath
+            ]
+        );
+
+    $_SESSION["flash_success"] =
+        "Prescription updated";
+
+    redirect(
+        "index.php?page=prescriptions&action=view&id="
+        . $id
+    );
+}
 }

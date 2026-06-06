@@ -125,17 +125,27 @@ function getStatusBadge($status)
                                         <?php if (
                                             !empty($appointment["prescription_id"])
                                         ): ?>
-                                                
+
                                             <a
                                                 href="index.php?page=prescriptions&action=view&id=<?= $appointment["prescription_id"] ?>"
                                                 class="btn btn-info btn-sm">
 
-                                                View Prescription
+                                                View
 
                                             </a>
 
+                                            <a
+                                            href="index.php?page=prescriptions&action=edit&id=<?= $appointment["prescription_id"] ?>"
+                                            class="btn btn-warning btn-sm">
+
+                                            Edit
+
+                                        </a>
+
+
                                         <?php endif; ?>
 
+                                        
                                         <?php if ($appointment["status"] === "cancelled"): ?>
 
                                             <span class="text-muted">
