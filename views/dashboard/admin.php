@@ -126,6 +126,22 @@ $rolesCount = $rolesCount ?? [];
                 <?php endforeach; ?>
             </div>
 
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card card-primary card-outline">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="far fa-chart-bar"></i>
+                                Appointments Load (Last 14 Days)
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="appointmentsChart" style="min-height: 300px; height: 300px; max-height: 300px; max-width: 100%;"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="row mt-4">
                 <div class="col-12">
                     <div class="card card-dark">
@@ -172,6 +188,41 @@ $rolesCount = $rolesCount ?? [];
         </div>
     </div>
 </div>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+
+        const labelsData = <?php echo $jsonLabels ?? '[]'; ?>;
+        const valuesData = <?php echo $jsonValues ?? '[]'; ?>;
+
+        const ctx = document.getElementById('appointmentsChart').getContext('2d');
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labelsData,
+                datasets: [{
+                    label: 'Number of Appointments',
+                    data: valuesData,
+                    backgroundColor: 'rgba(60,141,188,0.9)',
+                    borderColor: 'rgba(60,141,188,0.8)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true,
+                            stepSize: 1
+                        }
+                    }]
+                }
+            }
+        });
+    });
+</script>
 <?php
 require_once __DIR__ . "/../partials/footer.php";
 ?>

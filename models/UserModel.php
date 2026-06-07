@@ -216,4 +216,20 @@ class UserModel extends BaseModel
 
         return $result === true;
     }
+
+    public function updateFirstLoginPassword(int $userId, string $newHash): bool
+    {
+        
+        $result = $this->execute(
+            "UPDATE users SET password=?, first_login=0 WHERE id=?",
+            "si",
+            [
+                $newHash,
+                $userId
+            ]
+        );
+
+        return $result === true;
+    }
+    
 }

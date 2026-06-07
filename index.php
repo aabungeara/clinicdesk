@@ -14,6 +14,15 @@ require_once __DIR__ . "/config/constants.php";
 $page = $_GET["page"] ?? "auth";
 $action = $_GET["action"] ?? "login";
 
+
+if (isset($_SESSION['must_change_password'])) {
+    
+    if ($page !== 'auth' || !in_array($action, ['changePassword', 'updatePassword', 'logout'])) {
+        redirect("index.php?page=auth&action=changePassword");
+        exit;
+    }
+}
+
 if ($page === "auth") {
 
 

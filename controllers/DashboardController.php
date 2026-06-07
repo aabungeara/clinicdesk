@@ -35,7 +35,7 @@ class DashboardController
 
     private function adminDashboard(): void
     {
-        
+
         $rolesCount = $this->appointmentModel->getUsersCountByRole();
 
         $todayAppointmentsCount = $this->appointmentModel->getTodayAppointmentsCount();
@@ -43,6 +43,21 @@ class DashboardController
         $weekStats = $this->appointmentModel->getWeekStatsByStatus();
 
         $recentAppointments = $this->appointmentModel->getRecentAppointments(5);
+
+
+        $rawChartData = $this->appointmentModel->getAppointmentsLast14Days();
+
+        $chartLabels = [];
+        $chartValues = [];
+
+        foreach ($rawChartData as $row) {
+            $chartLabels[] = date('d M', strtotime($row['appt_date']));
+            $chartValues[] = (int)$row['total'];
+        }
+
+        $jsonLabels = json_encode($chartLabels);
+        $jsonValues = json_encode($chartValues);
+
 
         require_once __DIR__ . "/../views/dashboard/admin.php";
     }
@@ -67,12 +82,12 @@ class DashboardController
         $patientId = Auth::id();
 
         $myAppointments = $this->appointmentModel->getActiveAppointmentsByPatient($patientId);
-        
+
         $completedCount = $this->appointmentModel->getCompletedCountByPatient($patientId);
         $prescriptionsCount = $this->appointmentModel->getPrescriptionsCountByPatient($patientId);
 
         $patientStats = [
-            'total'     => count($myAppointments) + $completedCount, 
+            'total'     => count($myAppointments) + $completedCount,
             'pending'   => count(array_filter($myAppointments, fn($a) => strtolower($a['status']) === 'pending')),
             'completed' => $completedCount
         ];
